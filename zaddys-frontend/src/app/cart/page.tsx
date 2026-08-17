@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Trash2, ShoppingBag, MapPin, Phone, StickyNote, CreditCard } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import Autocomplete from "react-google-autocomplete";
 
 export default function CartAndCheckout() {
   const router = useRouter();
@@ -11,8 +12,8 @@ export default function CartAndCheckout() {
   const [step, setStep] = useState<"cart" | "checkout">("cart");
   const [isProcessing, setIsProcessing] = useState(false);
   const [customerEmail, setCustomerEmail] = useState("customer@zaddys.ng");
-  const [customerPhone, setCustomerPhone] = useState("+234 801 234 5678");
-  const [deliveryAddress, setDeliveryAddress] = useState("12 Admiralty Way, Lekki Phase 1");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
 
   const subtotal = cartTotal;
   const deliveryFee = 1500;
@@ -25,11 +26,12 @@ export default function CartAndCheckout() {
     script.async = true;
     document.body.appendChild(script);
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 
-  // ZERO-REDIRECTION IN-APP PAYSTACK MODAL
   const handleInAppPaystack = (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
@@ -42,29 +44,25 @@ export default function CartAndCheckout() {
       return;
     }
 
-    // @ts-ignore (Accessing PaystackPop loaded via script tag)
-    if (typeof window !== "undefined" && window.PaystackPop) {
-      // @ts-ignore
-      const paystack = new window.PaystackPop();
+    if (typeof window !== "undefined" && (window as any).PaystackPop) {
+      const paystack = new (window as any).PaystackPop();
       paystack.newTransaction({
         key: publicKey,
         email: customerEmail,
-        amount: total * 100, // Paystack operates in Kobo
+        amount: total * 100, 
         currency: "NGN",
         ref: `ZD-${Math.floor(100000 + Math.random() * 900000)}`,
         callback: (response: { reference: string }) => {
           setIsProcessing(false);
-          console.log("In-app payment successful! Reference:", response.reference);
-          // Redirect to success page inside the app
+          console.log("Payment successful! Ref:", response.reference);
           router.push("/success");
         },
         onClose: () => {
           setIsProcessing(false);
-          // User closed the popup modal manually
         },
       });
     } else {
-      alert("Paystack SDK is still loading. Please try again in a second.");
+      alert("Payment Gateway is still loading. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -116,21 +114,29 @@ export default function CartAndCheckout() {
           )}
         </div>
 
-        {/* STEP 2: SLIDE-IN CHECKOUT */}
+        {/* STEP 2: SLIDE-IN CHECKOUT WITH GOOGLE MAPS */}
         <div className={`transition-all duration-500 ${step === "cart" ? "translate-x-full opacity-0 absolute top-6 w-full" : "translate-x-0 opacity-100 relative"}`}>
            <form onSubmit={handleInAppPaystack} className="space-y-6">
               <section className="space-y-4">
                 <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2">Delivery Details</h2>
                 
+                {/* Google Maps Autocomplete Input */}
                 <div className="relative">
-                  <MapPin className="absolute top-3.5 left-4 text-zinc-400" size={20} />
-                  <input 
-                    required 
-                    type="text" 
-                    value={deliveryAddress} 
-                    onChange={(e) => setDeliveryAddress(e.target.value)} 
-                    placeholder="Delivery Address" 
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red" 
+                  <MapPin className="absolute top-3.5 left-4 text-zinc-400 z-10" size={20} />
+                  <Autocomplete
+                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+                    onPlaceSelected={(place) => {
+                      if (place && place.formatted_address) {
+                        setDeliveryAddress(place.formatted_address);
+                      }
+                    }}
+                    options={{
+                      types: ["address"],
+                      componentRestrictions: { country: "ng" }, // Restricts searches to Nigeria
+                    }}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red relative"
+                    placeholder="Search delivery address..."
+                    required
                   />
                 </div>
 
@@ -141,14 +147,14 @@ export default function CartAndCheckout() {
                     type="tel" 
                     value={customerPhone} 
                     onChange={(e) => setCustomerPhone(e.target.value)} 
-                    placeholder="Phone Number" 
+                    placeholder="Phone Number (e.g. 08012345678)" 
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red" 
                   />
                 </div>
 
                 <div className="relative">
                   <StickyNote className="absolute top-3.5 left-4 text-zinc-400" size={20} />
-                  <textarea placeholder="Delivery notes (optional)" className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red h-24 resize-none"></textarea>
+                  <textarea placeholder="Delivery notes (e.g. Leave at gate)" className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red h-24 resize-none"></textarea>
                 </div>
               </section>
 
@@ -179,8 +185,8 @@ export default function CartAndCheckout() {
             {step === "cart" ? (
               <button onClick={() => setStep("checkout")} className="w-full bg-zaddys-red text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-red-700 transition">Proceed to Checkout</button>
             ) : (
-              <button onClick={handleInAppPaystack} disabled={isProcessing} className="w-full bg-zaddys-red text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-red-700 transition flex justify-center items-center">
-                {isProcessing ? "Launching Secure Gateway..." : `Pay ₦${total.toLocaleString()}`}
+              <button onClick={handleInAppPaystack} disabled={isProcessing || !deliveryAddress} className="w-full bg-zaddys-red text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-red-700 transition flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                {isProcessing ? "Launching Gateway..." : `Pay ₦${total.toLocaleString()}`}
               </button>
             )}
           </div>

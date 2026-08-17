@@ -25,11 +25,10 @@ SECRET_KEY = 'django-insecure-qpdlp&6&*j+lvm0w%vs&en-^d6%yl$ph%c%kab7roixquo-q#4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+# Change this to allow your Next.js app to connect during testing
+ALLOWED_HOSTS = ['*'] 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,9 +36,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'menu',
 ]
 
 MIDDLEWARE = [
+    # CORS Middleware MUST go at the very top!
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,6 +54,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 
+# Add this right below ROOT_URLCONF to allow Next.js to fetch data
+CORS_ALLOW_ALL_ORIGINS = True
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -124,19 +129,38 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # --- ZADDYS CUSTOM CONFIGURATIONS ---
 from datetime import timedelta
 
-# Add our new apps to installed apps
-INSTALLED_APPS += [
+# Change this to allow your Next.js app to connect during testing
+ALLOWED_HOSTS = ['*'] 
+
+# Application definition
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
-    'api',
+    'menu',
 ]
 
-# Insert CORS middleware at the top
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
+MIDDLEWARE = [
+    # CORS Middleware MUST go at the very top!
+    'corsheaders.middleware.CorsMiddleware', 
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
-# Allow all origins for local Termux development
-CORS_ALLOW_ALL_ORIGINS = True 
+ROOT_URLCONF = 'core.urls'
+
+# Add this right below ROOT_URLCONF to allow Next.js to fetch data
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Configure Django REST Framework and JWT Auth
 REST_FRAMEWORK = {
@@ -150,5 +174,6 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-# Tell Django to use our custom User model
-AUTH_USER_MODEL = 'api.User'
+
+
+
