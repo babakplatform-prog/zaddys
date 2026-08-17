@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CartProvider } from "@/context/CartContext";
 
 export const metadata: Metadata = {
   title: "Zaddys Creamery & Grills",
@@ -13,8 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased font-sans bg-zaddys-black text-zaddys-white">
-        {children}
+      <body className="antialiased font-sans bg-zaddys-white text-zaddys-black">
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

@@ -6,11 +6,10 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Increased to 4 seconds to account for Termux load times
     const timer = setTimeout(() => {
       setIsVisible(false);
       setTimeout(onFinish, 500); 
-    }, 4000);
+    }, 3500);
     return () => clearTimeout(timer);
   }, [onFinish]);
 
@@ -18,28 +17,24 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zaddys-black"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zaddys-white"
+          initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
         >
-          {/* 360 Spin Logo */}
+          {/* Animated Red Circle */}
           <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
-            className="flex items-center justify-center"
+            initial={{ scale: 0, rotate: -180, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20, duration: 1 }}
+            className="w-24 h-24 bg-zaddys-red rounded-full flex items-center justify-center shadow-2xl shadow-red-900/30 mb-4"
           >
-            <h1 className="text-6xl font-black text-zaddys-red tracking-tighter" style={{ fontFamily: 'serif' }}>
-              Zaddys
-            </h1>
+            <span className="text-5xl font-black text-white" style={{ fontFamily: 'serif' }}>Z</span>
           </motion.div>
           
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-6 text-sm font-semibold tracking-widest text-zaddys-white uppercase font-sans"
-          >
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="text-3xl font-black text-zaddys-black tracking-tighter" style={{ fontFamily: 'serif' }}>
+            Zaddys
+          </motion.h1>
+
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-4 text-xs font-bold tracking-[0.3em] text-zinc-500 uppercase font-sans">
             Made for moments.
           </motion.p>
         </motion.div>
