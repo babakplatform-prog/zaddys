@@ -1,0 +1,11 @@
+# Python / Django
+zaddys-backend/venv/
+zaddys-backend/__pycache__/
+zaddys-backend/db.sqlite3
+zaddys-backend/media/
+*.pyc
+
+# Node / Next.js
+zaddys-frontend/node_modules/
+zaddys-frontend/.next/
+zaddys-frontend/.env*.local
