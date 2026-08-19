@@ -179,6 +179,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
+RESEND_API_KEY = 're_your_test_key_here'
 
 
 

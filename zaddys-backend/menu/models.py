@@ -9,6 +9,10 @@ class CustomerProfile(models.Model):
     loyalty_points = models.PositiveIntegerField(default=0)
     referral_code = models.CharField(max_length=10, unique=True, blank=True)
     referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         if not self.referral_code:

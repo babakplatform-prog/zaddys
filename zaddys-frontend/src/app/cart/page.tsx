@@ -1,197 +1,158 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useCart } from "@/context/CartContext";
+import { ArrowLeft, Trash2, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Trash2, ShoppingBag, MapPin, Phone, StickyNote, CreditCard } from "lucide-react";
-import { useCart } from "@/context/CartContext";
-import Autocomplete from "react-google-autocomplete";
+import { usePaystackPayment } from "react-paystack";
 
-export default function CartAndCheckout() {
+export default function CartPage() {
+  const { cart, removeFromCart, cartTotal, clearCart } = useCart();
   const router = useRouter();
-  const { cart, removeFromCart, cartTotal } = useCart();
-  const [step, setStep] = useState<"cart" | "checkout">("cart");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [customerEmail, setCustomerEmail] = useState("customer@zaddys.ng");
-  const [customerPhone, setCustomerPhone] = useState("");
+  
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState(""); // Needed for Paystack receipt
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const subtotal = cartTotal;
-  const deliveryFee = 1500;
-  const total = subtotal + deliveryFee;
+  // Paystack Configuration
+  const paystackConfig = {
+    reference: new Date().getTime().toString(),
+    email: email || "customer@zaddys.ng",
+    amount: cartTotal * 100, // Paystack calculates in kobo (multiply by 100)
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_your_key_here",
+  };
 
-  // Load Paystack Inline Script dynamically on mount
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
+  const initializePayment = usePaystackPayment(paystackConfig);
 
-  const handleInAppPaystack = (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSuccess = async (reference: any) => {
     setIsProcessing(true);
-
-    const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
-    
-    if (!publicKey || publicKey.includes("your_actual_public_key")) {
-      alert("Please update your NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY in .env.local with your real Paystack test key!");
-      setIsProcessing(false);
-      return;
-    }
-
-    if (typeof window !== "undefined" && (window as any).PaystackPop) {
-      const paystack = new (window as any).PaystackPop();
-      paystack.newTransaction({
-        key: publicKey,
-        email: customerEmail,
-        amount: total * 100, 
-        currency: "NGN",
-        ref: `ZD-${Math.floor(100000 + Math.random() * 900000)}`,
-        callback: (response: { reference: string }) => {
-          setIsProcessing(false);
-          console.log("Payment successful! Ref:", response.reference);
-          router.push("/success");
-        },
-        onClose: () => {
-          setIsProcessing(false);
-        },
+    // Payment Successful! Send order to Django Backend
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+      const res = await fetch(`${apiUrl}/orders/create/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cart: cart,
+          cartTotal: cartTotal,
+          delivery_address: deliveryAddress,
+          phone: phone,
+          transaction_ref: reference.reference
+        }),
       });
-    } else {
-      alert("Payment Gateway is still loading. Please try again.");
+
+      if (!res.ok) throw new Error("Failed to save order in database");
+      
+      clearCart();
+      alert("Payment Successful! Your Zaddys order is being prepared.");
+      router.push("/"); // Or push to a success/dashboard page
+    } catch (error) {
+      console.error("Order Save Error:", error);
+      alert("Payment was successful, but we had a hiccup saving your order. Please contact support.");
+    } finally {
       setIsProcessing(false);
     }
   };
 
+  const onClose = () => {
+    alert("Payment cancelled. You can complete your order anytime.");
+    setIsProcessing(false);
+  };
+
+  const handleCheckout = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (cart.length === 0) return alert("Your cart is empty!");
+    if (!email || !phone || !deliveryAddress) return alert("Please fill all details.");
+    
+    setIsProcessing(true);
+    // Fire Paystack Popup
+    initializePayment({ onSuccess, onClose });
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6">
+        <h2 className="text-2xl font-black text-black mb-2">Your Cart is Empty</h2>
+        <p className="text-zinc-500 mb-6">Looks like you haven't added any moments yet.</p>
+        <Link href="/" className="bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg">
+          Explore Menu
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-zaddys-white text-zaddys-black font-sans pb-32 relative overflow-hidden">
-      
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-zinc-100">
-        <div className="flex items-center px-4 h-16 max-w-md mx-auto">
-          <button onClick={() => step === "checkout" ? setStep("cart") : router.back()} className="text-zinc-500 hover:text-black transition">
-            <ArrowLeft size={24} />
-          </button>
-          <h1 className="text-lg font-bold ml-4">{step === "cart" ? "Your Cart" : "Checkout"}</h1>
-        </div>
-      </header>
+    <main className="min-h-screen bg-zinc-50 pb-32 font-sans">
+      <div className="bg-white p-4 shadow-sm flex items-center space-x-4 sticky top-0 z-50">
+        <button onClick={() => router.back()} className="p-2 bg-zinc-100 rounded-full text-black">
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className="text-xl font-black text-black tracking-tight">Checkout</h1>
+      </div>
 
-      <div className="max-w-md mx-auto px-4 pt-6 relative">
-        
-        {/* STEP 1: CART */}
-        <div className={`transition-all duration-500 ${step === "checkout" ? "-translate-x-full opacity-0 absolute w-full" : "translate-x-0 opacity-100"}`}>
-          {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center pt-20 text-zinc-400 space-y-4">
-              <ShoppingBag size={64} />
-              <p>Your cart is empty.</p>
-              <Link href="/"><button className="px-6 py-3 bg-zinc-100 text-black font-bold rounded-xl mt-4">Browse Menu</button></Link>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="space-y-4">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 bg-white p-3 rounded-2xl border border-zinc-200 shadow-sm">
-                    <div className="w-16 h-16 bg-zinc-100 rounded-xl flex items-center justify-center text-3xl">{item.image}</div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-sm text-black">{item.name}</h3>
-                      {item.customization && <p className="text-xs text-zaddys-red font-semibold">{item.customization}</p>}
-                      <p className="text-sm font-bold mt-1 text-zinc-500">₦{item.price.toLocaleString()} <span className="text-zinc-400 text-xs font-normal">x{item.qty}</span></p>
-                    </div>
-                    <button onClick={() => removeFromCart(item.id)} className="p-2 text-zinc-400 hover:text-zaddys-red transition"><Trash2 size={20} /></button>
-                  </div>
-                ))}
+      <div className="p-4 max-w-md mx-auto">
+        <h2 className="font-bold text-black mb-3 text-sm uppercase tracking-wider">Order Summary</h2>
+        <div className="bg-white rounded-3xl p-4 shadow-sm mb-6 space-y-4 border border-zinc-100">
+          {cart.map((item) => (
+            <div key={item.id} className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-16 h-16 bg-zinc-100 rounded-xl overflow-hidden flex-shrink-0">
+                  {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-black">{item.name}</h3>
+                  <p className="text-xs text-zinc-500 font-medium">Qty: {item.quantity}</p>
+                  <p className="text-sm font-black text-red-600">₦{(item.price * item.quantity).toLocaleString()}</p>
+                </div>
               </div>
-              
-              <div className="bg-zinc-50 p-5 rounded-2xl border border-zinc-200 flex justify-between items-center shadow-sm">
-                <span className="font-bold text-zinc-500">Subtotal</span>
-                <span className="font-black text-lg text-black">₦{subtotal.toLocaleString()}</span>
-              </div>
+              <button onClick={() => removeFromCart(item.id)} className="p-2 text-zinc-400 hover:text-red-600 transition">
+                <Trash2 size={18} />
+              </button>
             </div>
-          )}
+          ))}
         </div>
 
-        {/* STEP 2: SLIDE-IN CHECKOUT WITH GOOGLE MAPS */}
-        <div className={`transition-all duration-500 ${step === "cart" ? "translate-x-full opacity-0 absolute top-6 w-full" : "translate-x-0 opacity-100 relative"}`}>
-           <form onSubmit={handleInAppPaystack} className="space-y-6">
-              <section className="space-y-4">
-                <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-2">Delivery Details</h2>
-                
-                {/* Google Maps Autocomplete Input */}
-                <div className="relative">
-                  <MapPin className="absolute top-3.5 left-4 text-zinc-400 z-10" size={20} />
-                  <Autocomplete
-                    apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-                    onPlaceSelected={(place) => {
-                      if (place && place.formatted_address) {
-                        setDeliveryAddress(place.formatted_address);
-                      }
-                    }}
-                    options={{
-                      types: ["address"],
-                      componentRestrictions: { country: "ng" }, // Restricts searches to Nigeria
-                    }}
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red relative"
-                    placeholder="Search delivery address..."
-                    required
-                  />
-                </div>
+        <h2 className="font-bold text-black mb-3 text-sm uppercase tracking-wider">Delivery Info</h2>
+        <form id="checkout-form" onSubmit={handleCheckout} className="space-y-3 mb-6">
+          <input 
+            type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email Address (for receipt)" 
+            className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
+          />
+          <input 
+            type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
+            placeholder="Phone Number" 
+            className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
+          />
+          <div className="relative">
+            <MapPin className="absolute left-3 top-3.5 text-zinc-400" size={18} />
+            <input 
+              type="text" required value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)}
+              placeholder="Full Delivery Address" 
+              className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 pl-10 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
+            />
+          </div>
+        </form>
 
-                <div className="relative">
-                  <Phone className="absolute top-3.5 left-4 text-zinc-400" size={20} />
-                  <input 
-                    required 
-                    type="tel" 
-                    value={customerPhone} 
-                    onChange={(e) => setCustomerPhone(e.target.value)} 
-                    placeholder="Phone Number (e.g. 08012345678)" 
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red" 
-                  />
-                </div>
-
-                <div className="relative">
-                  <StickyNote className="absolute top-3.5 left-4 text-zinc-400" size={20} />
-                  <textarea placeholder="Delivery notes (e.g. Leave at gate)" className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl pl-12 pr-4 py-3.5 text-black focus:outline-none focus:border-zaddys-red h-24 resize-none"></textarea>
-                </div>
-              </section>
-
-              <section className="mt-8">
-                <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Order Summary</h2>
-                <div className="bg-zinc-50 p-5 rounded-2xl border border-zinc-200 space-y-3 shadow-sm">
-                  <div className="flex justify-between text-sm text-zinc-500"><span>Subtotal</span><span className="font-semibold text-black">₦{subtotal.toLocaleString()}</span></div>
-                  <div className="flex justify-between text-sm text-zinc-500"><span>Delivery Fee</span><span className="font-semibold text-black">₦{deliveryFee.toLocaleString()}</span></div>
-                  <div className="w-full h-px bg-zinc-200 my-2"></div>
-                  <div className="flex justify-between text-lg font-black"><span>Total</span><span className="text-zaddys-red">₦{total.toLocaleString()}</span></div>
-                </div>
-              </section>
-
-              <section className="mt-8">
-                <div className="flex items-center justify-between bg-white border border-zaddys-red rounded-2xl p-4 shadow-sm bg-red-50/30">
-                  <div className="flex items-center space-x-3"><CreditCard className="text-zaddys-red" size={24} /><span className="font-bold text-sm text-black">Paystack In-App Secure Checkout</span></div>
-                  <div className="w-5 h-5 rounded-full border-2 border-zaddys-red flex items-center justify-center"><div className="w-2.5 h-2.5 bg-zaddys-red rounded-full"></div></div>
-                </div>
-              </section>
-           </form>
+        <div className="bg-black text-white rounded-3xl p-5 shadow-lg mb-4">
+          <div className="flex justify-between items-center mb-2 text-sm text-zinc-400">
+            <span>Subtotal</span><span>₦{cartTotal.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center text-lg font-black">
+            <span>Total</span><span className="text-red-500">₦{cartTotal.toLocaleString()}</span>
+          </div>
         </div>
       </div>
 
-      {/* Sticky Bottom Button */}
-      {cart.length > 0 && (
-        <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-zinc-200 p-5 pb-safe z-50">
-          <div className="max-w-md mx-auto">
-            {step === "cart" ? (
-              <button onClick={() => setStep("checkout")} className="w-full bg-zaddys-red text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-red-700 transition">Proceed to Checkout</button>
-            ) : (
-              <button onClick={handleInAppPaystack} disabled={isProcessing || !deliveryAddress} className="w-full bg-zaddys-red text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-red-700 transition flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed">
-                {isProcessing ? "Launching Gateway..." : `Pay ₦${total.toLocaleString()}`}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      <div className="fixed bottom-0 left-0 w-full p-4 bg-white/90 backdrop-blur border-t border-zinc-100 z-50">
+        <button 
+          form="checkout-form" type="submit" disabled={isProcessing}
+          className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-lg transition flex items-center justify-center uppercase tracking-wide text-sm"
+        >
+          {isProcessing ? "Processing..." : `Pay ₦${cartTotal.toLocaleString()}`}
+        </button>
+      </div>
     </main>
   );
 }

@@ -1,83 +1,126 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, Package, Star, Gift, LogOut, Copy } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft, Package, Settings, LogOut, ChevronRight } from "lucide-react";
-import DockNav from "@/components/DockNav";
+import { useRouter } from "next/navigation";
 
-export default function ProfilePage() {
+export default function ProfileDashboard() {
+  const router = useRouter();
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // In a real flow, this email comes from NextAuth/Zustand state. 
+  // We'll mock it for now so you can see the UI immediately once we test!
+  const userEmail = "customer@zaddys.ng"; 
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+    fetch(`${apiUrl}/profile/${userEmail}/`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) setUserData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load profile:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  const copyReferral = () => {
+    if (userData?.referral_code) {
+      navigator.clipboard.writeText(userData.referral_code);
+      alert("Referral code copied! Share it to earn free moments.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+        <div className="w-8 h-8 border-4 border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-zaddys-white text-zaddys-black font-sans pb-28 relative">
-      
+    <main className="min-h-screen bg-zinc-50 pb-28 font-sans">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-zinc-100">
-        <div className="flex items-center px-4 h-16 max-w-md mx-auto">
-          <Link href="/" className="text-zinc-500 hover:text-black transition">
-            <ArrowLeft size={24} />
-          </Link>
-          <h1 className="text-lg font-bold ml-4">My Profile</h1>
+      <div className="bg-black text-white p-6 pt-10 rounded-b-[40px] shadow-lg relative">
+        <button onClick={() => router.push("/")} className="absolute top-8 left-6 p-2 bg-zinc-900 rounded-full text-white">
+          <ArrowLeft size={20} />
+        </button>
+        <div className="mt-12">
+          <h1 className="text-3xl font-black tracking-tight">{userData?.name || "Foodie"}</h1>
+          <p className="text-zinc-400 text-sm mt-1">{userData?.email}</p>
         </div>
-      </header>
-
-      <div className="max-w-md mx-auto px-4 pt-6">
         
-        {/* User Info Card */}
-        <div className="bg-zinc-50 border border-zinc-200 p-5 rounded-2xl flex items-center space-x-4 mb-8 shadow-sm">
-          <div className="w-16 h-16 bg-zaddys-red rounded-full flex items-center justify-center text-white text-xl font-black">
-            JD
-          </div>
+        {/* Loyalty Points Card */}
+        <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-3xl p-5 mt-6 shadow-xl flex items-center justify-between border border-red-500">
           <div>
-            <h2 className="text-lg font-black text-black">John Doe</h2>
-            <p className="text-sm text-zinc-500">john.doe@example.com</p>
-            <p className="text-xs font-bold text-zaddys-red mt-1 cursor-pointer">Edit Profile</p>
+            <p className="text-red-100 text-xs font-bold uppercase tracking-wider mb-1">Zaddys Points</p>
+            <p className="text-3xl font-black">{userData?.points || 0}</p>
           </div>
-        </div>
-
-        {/* Active Orders */}
-        <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Active Orders</h3>
-        <div className="bg-white border border-zinc-200 p-4 rounded-2xl flex items-center justify-between mb-8 shadow-sm cursor-pointer hover:border-zaddys-red transition">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
-              <Package size={20} />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-black">Order #ZD-84729</p>
-              <p className="text-xs font-semibold text-orange-500">Preparing...</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="text-zinc-400" />
-        </div>
-
-        {/* Menu Links */}
-        <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Account</h3>
-        <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm divide-y divide-zinc-100 overflow-hidden">
-          
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition">
-            <div className="flex items-center space-x-3 text-black">
-              <Package size={20} className="text-zinc-400" />
-              <span className="font-semibold text-sm">Order History</span>
-            </div>
-            <ChevronRight size={18} className="text-zinc-400" />
-          </button>
-
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition">
-            <div className="flex items-center space-x-3 text-black">
-              <Settings size={20} className="text-zinc-400" />
-              <span className="font-semibold text-sm">Settings & Addresses</span>
-            </div>
-            <ChevronRight size={18} className="text-zinc-400" />
-          </button>
-
-          <button className="w-full flex items-center justify-between p-4 hover:bg-red-50 transition group">
-            <div className="flex items-center space-x-3 text-zaddys-red">
-              <LogOut size={20} />
-              <span className="font-semibold text-sm">Log Out</span>
-            </div>
-          </button>
-          
+          <Star size={40} className="text-red-300 opacity-50" />
         </div>
       </div>
 
-      <DockNav />
+      <div className="max-w-md mx-auto px-5 mt-6 space-y-6">
+        
+        {/* Referral Section */}
+        <div className="bg-white rounded-3xl p-5 shadow-sm border border-zinc-100 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="bg-red-50 p-3 rounded-2xl text-red-600">
+              <Gift size={24} />
+            </div>
+            <div>
+              <p className="text-xs text-zinc-500 font-bold uppercase">Refer & Earn</p>
+              <p className="text-black font-black">{userData?.referral_code || "ZADDYS-VIP"}</p>
+            </div>
+          </div>
+          <button onClick={copyReferral} className="p-3 bg-zinc-100 rounded-xl text-black hover:bg-zinc-200 transition">
+            <Copy size={18} />
+          </button>
+        </div>
+
+        {/* Order History */}
+        <div>
+          <h2 className="text-lg font-black text-black mb-3">Recent Orders</h2>
+          {userData?.orders && userData.orders.length > 0 ? (
+            <div className="space-y-3">
+              {userData.orders.map((order: any, idx: number) => (
+                <div key={idx} className="bg-white p-4 rounded-3xl shadow-sm border border-zinc-100 flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-zinc-100 p-3 rounded-2xl text-black">
+                      <Package size={20} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-black">Order #{order.id}</p>
+                      <p className="text-xs font-semibold text-zinc-500 mt-0.5">
+                        <span className={order.status === "Pending" ? "text-orange-500" : "text-green-500"}>
+                          {order.status}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-red-600 text-sm">₦{Number(order.total_price).toLocaleString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100 text-center">
+              <p className="text-zinc-500 text-sm font-medium">No orders yet. Time to treat yourself!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Logout Button */}
+        <button className="w-full bg-zinc-200 hover:bg-zinc-300 text-black font-bold py-4 rounded-2xl transition flex items-center justify-center space-x-2 mt-8">
+          <LogOut size={18} />
+          <span>Sign Out</span>
+        </button>
+      </div>
     </main>
   );
 }
