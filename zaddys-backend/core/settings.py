@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os  # <--- ADD IT RIGHT HERE AT THE TOP
+import os 
+import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qpdlp&6&*j+lvm0w%vs&en-^d6%yl$ph%c%kab7roixquo-q#4'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # Change this to allow your Next.js app to connect during testing
-ALLOWED_HOSTS = ['*'] 
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').split(',') if host.strip()]
 
 # Application definition
 INSTALLED_APPS = [
@@ -56,7 +58,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'core.urls'
 
 # Add this right below ROOT_URLCONF to allow Next.js to fetch data
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -78,12 +80,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+DATABASES = {'default': dj_database_url.config(default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')}
 
 
 # Password validation
@@ -135,7 +132,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 from datetime import timedelta
 
 # Change this to allow your Next.js app to connect during testing
-ALLOWED_HOSTS = ['*'] 
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').split(',') if host.strip()]
 
 # Application definition
 INSTALLED_APPS = [
@@ -165,7 +162,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'core.urls'
 
 # Add this right below ROOT_URLCONF to allow Next.js to fetch data
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',') if origin.strip()]
 
 # Configure Django REST Framework and JWT Auth
 REST_FRAMEWORK = {
@@ -179,7 +176,9 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-RESEND_API_KEY = 're_your_test_key_here'
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'orders@zaddys.ng')
 
 
 

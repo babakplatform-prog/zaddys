@@ -1,26 +1,29 @@
 from rest_framework import views, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Order, CustomerProfile
 from django.contrib.auth.models import User
 
 class UserProfileView(views.APIView):
-    def get(self, request, email):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
         try:
-            # Find the user and their profile
-            user = User.objects.get(email=email)
-            profile = CustomerProfile.objects.get(user=user)
+            user = request.user
+            profile, _ = CustomerProfile.objects.get_or_create(user=user)
             
             # Get their order history (matching by phone for now)
-            orders = Order.objects.filter(phone=profile.phone).order_by('-id').values(
-                'id', 'total_price', 'status', 'delivery_address'
+            orders = Order.objects.filter(user=user).order_by('-id').values(
+                'id', 'order_number', 'total_price', 'status', 'delivery_address', 'created_at'
             )
             
             return Response({
-                "name": user.username,
+                "name": user.get_full_name() or user.username,
                 "email": user.email,
                 "phone": profile.phone,
                 "referral_code": profile.referral_code,
                 "points": getattr(profile, 'points', 0), # Fallback to 0 if points aren't set
+                "addresses": list(profile.addresses.values('id', 'label', 'address', 'landmark', 'city', 'is_default')),
                 "orders": list(orders)
             }, status=status.HTTP_200_OK)
             

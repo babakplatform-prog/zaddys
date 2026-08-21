@@ -1,8 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "navigation"; // or next/navigation depending on your setup
-import { Eye, EyeOff, Lock, Mail, User, Phone, Gift, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Apple, ArrowRight, AtSign, Eye, EyeOff, Gift, Globe2, Lock, Mail, Phone, User, UsersRound } from "lucide-react";
 import { registerUser } from "@/services/authService";
+import Image from "next/image";
+import { signIn } from "next-auth/react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,6 +21,9 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const handleSocialAuth = (provider: "google" | "apple" | "facebook" | "twitter") => {
+    signIn(provider, { callbackUrl: sessionStorage.getItem("zaddys_auth_return") || "/" });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,31 +40,36 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      await registerUser({
+      const data = await registerUser({
         username: formData.username,
         email: formData.email,
         password: formData.password,
         phone: formData.phone,
+        referralCode: formData.referralCode,
       });
-      // Redirect or show success (Welcome email is automatically sent via Resend!)
+      localStorage.setItem("zaddys_access_token", data.access);
+      localStorage.setItem("zaddys_refresh_token", data.refresh);
       alert("Account created successfully! Check your email for a welcome message.");
-      router.push("/");
-    } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+      const returnPath = sessionStorage.getItem("zaddys_auth_return") || "/";
+      sessionStorage.removeItem("zaddys_auth_return");
+      router.push(returnPath);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col justify-center px-6 py-12 max-w-md mx-auto">
+    <div className="app-frame flex min-h-screen flex-col justify-center px-5 py-10 pb-40">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-black tracking-tight text-white">ZADDYS</h1>
-        <p className="text-zinc-400 text-sm mt-1">Made for moments. Join the club.</p>
+        <Image src="/zaddys-logo.jpg" alt="Zaddys" width={72} height={72} className="mx-auto mb-2 h-12 w-12 rounded-full object-cover" priority />
+        <h1 className="text-[24px] font-bold tracking-[0.08em] text-zaddys-ink">ZADDYS</h1>
+        <p className="mt-1 text-[13px] text-zaddys-gray">Made for moments. Join the club.</p>
       </div>
 
       {error && (
-        <div className="bg-red-950/80 border border-red-600 text-red-200 text-sm p-3 rounded-xl mb-4 text-center">
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-center text-[13px] text-red-700">
           {error}
         </div>
       )}
@@ -77,7 +87,7 @@ export default function SignupPage() {
               value={formData.username}
               onChange={handleChange}
               placeholder="e.g. John Doe"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 pl-10 text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition"
+              className="field pl-10"
             />
           </div>
         </div>
@@ -94,7 +104,7 @@ export default function SignupPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="name@example.com"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 pl-10 text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition"
+              className="field pl-10"
             />
           </div>
         </div>
@@ -111,7 +121,7 @@ export default function SignupPage() {
               value={formData.phone}
               onChange={handleChange}
               placeholder="08012345678"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 pl-10 text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition"
+              className="field pl-10"
             />
           </div>
         </div>
@@ -128,12 +138,12 @@ export default function SignupPage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 pl-10 pr-10 text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition"
+              className="field pl-10 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3.5 text-zinc-500 hover:text-white"
+              className="absolute right-3 top-3.5 text-zinc-400 hover:text-zaddys-ink"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -152,12 +162,12 @@ export default function SignupPage() {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="••••••••"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 pl-10 pr-10 text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition"
+              className="field pl-10 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-3.5 text-zinc-500 hover:text-white"
+              className="absolute right-3 top-3.5 text-zinc-400 hover:text-zaddys-ink"
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -175,7 +185,7 @@ export default function SignupPage() {
               value={formData.referralCode}
               onChange={handleChange}
               placeholder="Got a code from a friend?"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-3 pl-10 text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition uppercase"
+              className="field pl-10 uppercase"
             />
           </div>
         </div>
@@ -196,6 +206,19 @@ export default function SignupPage() {
           )}
         </button>
       </form>
+      <div className="mt-7 border-t border-zaddys-border pt-5">
+        <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-zaddys-gray">Or continue with</p>
+        <div className="grid grid-cols-4 gap-2">
+          {([
+            ["google", "Google", Globe2],
+            ["apple", "Apple", Apple],
+            ["facebook", "Facebook", UsersRound],
+            ["twitter", "X", AtSign],
+          ] as const).map(([provider, label, Icon]) => (
+            <button key={provider} type="button" onClick={() => handleSocialAuth(provider)} className="flex items-center justify-center gap-2 rounded-xl border border-zaddys-border bg-zaddys-surface px-2 py-3 text-[12px] font-semibold text-zaddys-ink transition hover:border-zaddys-red"><Icon size={16} aria-hidden="true" /><span>{label}</span></button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

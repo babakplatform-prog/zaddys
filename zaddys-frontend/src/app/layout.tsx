@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import { CartProvider } from "@/context/CartContext"; // IMPORT THE CART
+import "./globals.css"; // THIS LINE FIXES THE PLAIN TEXT!
+import { CartProvider } from "@/context/CartContext";
+import DockNav from "@/components/DockNav"; // BRINGS BACK THE DOCK
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Zaddys Creamery & Grills",
   description: "Made for moments.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
@@ -18,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {/* WRAP THE CHILDREN IN THE CART PROVIDER */}
         <CartProvider>
-          {children}
+          <div className="app-content">
+            {children}
+            <DockNav />
+          </div>
         </CartProvider>
       </body>
     </html>

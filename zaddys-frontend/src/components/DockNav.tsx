@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ShoppingBag, User, MessageCircle } from "lucide-react";
+import { Headphones, Home, Search, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 export default function DockNav() {
@@ -13,19 +13,18 @@ export default function DockNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-black/90 backdrop-blur-lg border border-zinc-800 rounded-full py-3 px-6 shadow-2xl z-50 flex items-center justify-between">
+    <nav aria-label="Primary navigation" className="fixed bottom-4 left-1/2 z-50 flex w-[calc(100%-1rem)] max-w-lg -translate-x-1/2 items-center justify-around rounded-2xl border border-zinc-700 bg-zaddys-black px-3 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2.5 text-white shadow-2xl">
       
       {/* Home */}
       <Link href="/" className={`flex flex-col items-center space-y-1 transition ${isActive("/") ? "text-white" : "text-zinc-500 hover:text-zinc-300"}`}>
         <Home size={22} className={isActive("/") ? "fill-white/20" : ""} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Home</span>
+        <span className="text-[11px] font-medium">Home</span>
       </Link>
 
-      {/* WhatsApp Support / Quote */}
-      <a href="https://wa.me/2348000000000" target="_blank" rel="noreferrer" className="flex flex-col items-center space-y-1 text-zinc-500 hover:text-green-500 transition">
-        <MessageCircle size={22} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Chat</span>
-      </a>
+      <Link href="/#menu" className={`flex flex-col items-center gap-1 transition ${isActive("/") ? "text-zaddys-red" : "text-zinc-400 hover:text-white"}`}>
+        <Search size={21} />
+        <span className="text-[11px] font-medium">Search</span>
+      </Link>
 
       {/* Cart with Live Badge */}
       <Link href="/cart" className={`relative flex flex-col items-center space-y-1 transition ${isActive("/cart") ? "text-red-500" : "text-zinc-500 hover:text-zinc-300"}`}>
@@ -37,15 +36,20 @@ export default function DockNav() {
             </span>
           )}
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider">Cart</span>
+        <span className="text-[11px] font-medium">Cart</span>
+      </Link>
+
+      <Link href="/support" className={`flex flex-col items-center gap-1 transition ${isActive("/support") ? "text-zaddys-red" : "text-zinc-400 hover:text-white"}`}>
+        <Headphones size={21} />
+        <span className="text-[11px] font-medium">Support</span>
       </Link>
 
       {/* Profile */}
       <Link href="/profile" className={`flex flex-col items-center space-y-1 transition ${isActive("/profile") || isActive("/login") ? "text-white" : "text-zinc-500 hover:text-zinc-300"}`}>
         <User size={22} className={isActive("/profile") ? "fill-white/20" : ""} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+        <span className="text-[11px] font-medium">Profile</span>
       </Link>
 
-    </div>
+    </nav>
   );
 }

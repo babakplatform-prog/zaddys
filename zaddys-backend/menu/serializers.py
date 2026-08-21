@@ -1,26 +1,29 @@
 from rest_framework import serializers
-from .models import Product, OptionGroup, OptionItem, PromoBanner, Category
+from .models import Product, ProductOptionGroup, ProductOption, DeliveryZone
 
-class PromoBannerSerializer(serializers.ModelSerializer):
+class ProductOptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PromoBanner
-        fields = '__all__'
+        model = ProductOption
+        fields = ['id', 'name', 'price_extra']
 
-class OptionItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OptionItem
-        fields = ['id', 'name', 'price']
+class ProductOptionGroupSerializer(serializers.ModelSerializer):
+    options = ProductOptionSerializer(many=True, read_only=True)
 
-class OptionGroupSerializer(serializers.ModelSerializer):
-    items = OptionItemSerializer(many=True, read_only=True)
     class Meta:
-        model = OptionGroup
-        fields = ['id', 'name', 'is_required', 'is_multiple', 'items']
+        model = ProductOptionGroup
+        fields = ['id', 'name', 'is_required', 'is_multiple', 'options']
 
 class ProductSerializer(serializers.ModelSerializer):
-    optionGroups = OptionGroupSerializer(source='option_groups', many=True, read_only=True)
+    optionGroups = ProductOptionGroupSerializer(source='option_groups', many=True, read_only=True)
+    option_groups = ProductOptionGroupSerializer(many=True, read_only=True)
     category = serializers.StringRelatedField()
-    
+    category_name = serializers.CharField(source='category.name', read_only=True)
+
     class Meta:
         model = Product
-        fields = ['id', 'category', 'name', 'slug', 'description', 'price', 'image', 'is_available', 'is_custom_quote', 'optionGroups']
+        fields = ['id', 'category', 'category_name', 'name', 'description', 'price', 'image', 'is_available', 'inventory_status', 'is_custom_quote', 'optionGroups', 'option_groups']
+
+class DeliveryZoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryZone
+        fields = ['id', 'name', 'fee']

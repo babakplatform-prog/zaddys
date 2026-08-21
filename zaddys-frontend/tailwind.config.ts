@@ -10,10 +10,13 @@ const config: Config = {
     extend: {
       colors: {
         zaddys: {
-          red: "#D90429",
-          black: "#0D0D0D",
+          red: "#C91414",
+          black: "#121212",
+          ink: "#1A1A1A",
+          gray: "#666666",
           white: "#FFFFFF",
-          card: "#1A1A1A",
+          surface: "#F9F9F9",
+          border: "#EAEAEA",
         },
       },
     },

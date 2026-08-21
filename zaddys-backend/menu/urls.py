@@ -1,13 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, PromoBannerViewSet
+from .views import ProductViewSet, DeliveryZoneViewSet, ValidateCouponView, SupportConversationView
 from .views_auth import RegisterView, LoginView, VerifyOTPView
-from .views_order import CreateOrderView
+from .views_order import CreateOrderView, OrderTrackingView
 from .views_profile import UserProfileView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
-router.register(r'banners', PromoBannerViewSet)
+router.register(r'delivery-zones', DeliveryZoneViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -19,5 +19,8 @@ urlpatterns = [
     
     # Orders & Profile Endpoints
     path('orders/create/', CreateOrderView.as_view(), name='create-order'),
-    path('profile/<str:email>/', UserProfileView.as_view(), name='user-profile'),
+    path('orders/<str:order_number>/', OrderTrackingView.as_view(), name='order-tracking'),
+    path('coupons/validate/', ValidateCouponView.as_view(), name='validate-coupon'),
+    path('support/conversation/', SupportConversationView.as_view(), name='support-conversation'),
+    path('profile/', UserProfileView.as_view(), name='user-profile'),
 ]

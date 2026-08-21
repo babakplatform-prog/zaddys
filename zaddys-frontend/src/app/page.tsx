@@ -1,117 +1,256 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
-// Make sure you have your existing components imported correctly:
-// import SplashScreen from "@/components/SplashScreen";
-// import Header from "@/components/Header";
-// import DockNav from "@/components/DockNav";
+import { ArrowUp, ChevronRight, Search, SlidersHorizontal, ShoppingBag } from "lucide-react";
+import { ChevronRight, Download, Search, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
+import Image from "next/image";
+import { getAccessToken } from "@/services/authService";
 
-// Helper Interface for TypeScript
-interface Product {
+type Product = {
   id: number;
-  category: string;
   name: string;
-  price: string;
-  image: string;
+  category_name: string;
+  price: number | string;
+  image?: string | null;
   is_custom_quote: boolean;
-}
+};
 
-export default function Home() {
+export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
+  const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  
-  // State for live Django data
-  const [menuData, setMenuData] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>(["All"]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [userName, setUserName] = useState("there");
+  const [promoIndex, setPromoIndex] = useState(0);
+    const [installPrompt, setInstallPrompt] = useState<Event & { prompt?: () => Promise<void> } | null>(null);
+    const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const secondRowMarker = React.useRef<HTMLDivElement | null>(null);
 
-  // FETCH LIVE DATA FROM DJANGO
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+  
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/products/")
+    // Splash screen timer (1.8 - 2 seconds as per brand design brief)
+    const splashTimer = setTimeout(() => setShowSplash(false), 2000); 
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+    
+    const token = getAccessToken();
+    const profileRequest = token
+      ? fetch(`${apiUrl}/profile/`, { headers: { Authorization: `Bearer ${token}` } })
+          .then((res) => res.ok ? res.json() : null)
+          .then((profile) => profile?.name && setUserName(profile.name.split(" ")[0]))
+      : Promise.resolve();
+
+    fetch(`${apiUrl}/products/`)
       .then((res) => res.json())
       .then((data) => {
-        setMenuData(data);
-        
-        // Dynamically extract unique categories from the live products
-        const uniqueCategories = Array.from(new Set(data.map((item: Product) => item.category)));
-        setCategories(["All", ...uniqueCategories as string[]]);
-        
-        setIsLoading(false);
+        setProducts(Array.isArray(data) ? data : data.results || []);
+        setLoading(false);
       })
-      .catch((error) => {
-        console.error("Failed to fetch from Django:", error);
-        setIsLoading(false);
+      .catch((err) => {
+        console.error("Failed to load live menu:", err);
+        setLoading(false);
       });
+
+    return () => {
+      clearTimeout(splashTimer);
+      void profileRequest;
+    };
   }, []);
 
-  const filteredMenu = activeCategory === "All" 
-    ? menuData 
-    : menuData.filter(item => item.category === activeCategory);
+  const categories = ["All", ...Array.from(new Set(products.map((product) => product.category_name).filter(Boolean)))];
+  const visibleProducts = products.filter((product) => {
+    const matchesCategory = activeCategory === "All" || product.category_name === activeCategory;
+    const matchesQuery = product.name.toLowerCase().includes(query.toLowerCase());
+    return matchesCategory && matchesQuery;
+  });
+  const promoProducts = products.slice(0, 3);
+  const promoProduct = promoProducts[promoIndex % Math.max(promoProducts.length, 1)];
+  const promoLabels = [
+    { badge: "Featured today", description: "A delicious favourite, freshly prepared for your next moment." },
+    { badge: "Made to share", description: "Bring something special to the table with ZADDYS." },
+    { badge: "Sweet moments", description: "Treat yourself to a little extra joy today." },
+  ];
+  const promoCopy = promoLabels[promoIndex % promoLabels.length];
 
+  useEffect(() => {
+    if (promoProducts.length < 2) return;
+    const promoTimer = window.setInterval(() => setPromoIndex((index) => index + 1), 5000);
+    return () => window.clearInterval(promoTimer);
+  }, [promoProducts.length]);
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) void navigator.serviceWorker.register("/sw.js");
+    const onBeforeInstall = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as Event & { prompt?: () => Promise<void> });
+    };
+    window.addEventListener("beforeinstallprompt", onBeforeInstall);
+    const timer = window.setTimeout(() => setShowInstallPrompt(true), 60000);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  const installApp = async () => {
+    if (installPrompt?.prompt) await installPrompt.prompt();
+    setShowInstallPrompt(false);
+  };
+
+  useEffect(() => {
+    const marker = secondRowMarker.current;
+    if (!marker) return;
+    const observer = new IntersectionObserver(([entry]) => setShowBackToTop(entry.isIntersecting), { threshold: 0.1 });
+    observer.observe(marker);
+    return () => observer.disconnect();
+  }, [visibleProducts.length]);
+
+  // ==========================================
+  // SPLASH SCREEN (White background, spinning logo)
+  // ==========================================
+  if (showSplash) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white relative overflow-hidden">
+        <div className="relative w-36 h-36 animate-[spin_4s_linear_infinite]">
+          <Image
+            src="/zaddys-logo.jpg"
+            alt="Zaddys Logo"
+            fill
+            priority
+            sizes="144px"
+            className="object-contain drop-shadow-md"
+          />
+        </div>
+        <p className="absolute bottom-12 text-white font-semibold uppercase tracking-[0.3em] text-xs animate-pulse">
+          Made for moments.
+        </p>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // MAIN HOME VIEW (Strict Red, White & Black)
+  // ==========================================
   return (
-    <main className="min-h-screen bg-zaddys-white text-zaddys-black font-sans overflow-x-hidden">
-      {/* If you have the SplashScreen component, uncomment it */}
-      {/* {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />} */}
+    <main className="app-frame pb-32">
+      {/* Header Section */}
+      <div className="relative z-10 border-b border-zinc-100 bg-white px-5 pb-6 pt-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Image src="/zaddys-logo.jpg" alt="ZADDYS logo" width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
+            <span className="text-[16px] font-black tracking-[0.08em] text-zaddys-ink">ZADDYS</span>
+          </div>
+          <Link href="/cart" aria-label="Open cart" className="relative rounded-full bg-zaddys-surface p-2 text-zaddys-ink">
+            <ShoppingBag size={19} />
+          </Link>
+        </div>
+        <h2 className="text-[12px] font-semibold uppercase tracking-[0.12em] text-zaddys-gray">{getGreeting()}</h2>
+        <h1 className="mt-1 text-[24px] font-bold leading-7 text-zaddys-ink">{userName}!</h1>
+        <p className="text-sm text-zinc-500 mt-1">What are you craving today?</p>
 
-      {!showSplash && (
-        <div className="pb-28 animate-in fade-in duration-700">
-          {/* <Header /> */}
+        {promoProduct && (
+          <Link href={`/product/${promoProduct.id}`} className="relative mt-6 block min-h-40 overflow-hidden rounded-2xl bg-zaddys-black p-5 text-white shadow-lg">
+            {promoProduct.image && <Image src={promoProduct.image} alt="Zaddys featured offer" fill unoptimized sizes="(max-width: 512px) 90vw, 440px" className="object-cover opacity-45" />}
+            <div className="relative z-10 max-w-[75%]">
+              <span className="mb-2 inline-flex rounded-full bg-zaddys-red px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]">{promoCopy.badge}</span>
+              <h2 className="text-[20px] font-bold leading-6">{promoProduct.name}</h2>
+              <p className="mt-1 text-[12px] text-white/80">{promoCopy.description}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-[12px] font-semibold">Explore offer <ChevronRight size={15} /></span>
+            </div>
+            <div className="absolute bottom-4 right-4 flex gap-1.5">
+              {promoProducts.map((item, index) => <span key={item.id} className={`h-1.5 rounded-full transition-all ${index === promoIndex % promoProducts.length ? "w-5 bg-white" : "w-1.5 bg-white/50"}`} />)}
+            </div>
+          </Link>
+        )}
 
-          <div className="max-w-md mx-auto px-4 mt-6">
-              <h2 className="text-3xl font-black mb-1 tracking-tight">Experience <br/><span className="text-zaddys-red">Gourmet Flavors</span></h2>
+        {/* Search Bar */}
+        <div className="mt-6 flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-3.5 text-zinc-400" size={20} />
+            <input 
+              type="text" 
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search the menu..."
+              className="w-full bg-zinc-100 border-none rounded-2xl px-4 py-3.5 pl-12 text-black placeholder-zinc-400 focus:ring-2 focus:ring-red-600 transition"
+            />
+          </div>
+          <button type="button" aria-label="Filter menu" className="flex-shrink-0 rounded-2xl bg-zaddys-red p-3.5 text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700">
+            <SlidersHorizontal size={20} />
+          </button>
+        </div>
+      </div>
 
-              {/* Dynamic Category Scroller */}
-              <div className="flex space-x-3 overflow-x-auto py-5 scrollbar-hide">
-                {categories.map((cat, idx) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
-                      activeCategory === cat ? "bg-zaddys-red text-white shadow-md shadow-red-900/20" : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
+      {/* Menu Section */}
+      <div className="px-6 mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-black tracking-tight text-black uppercase">Our Menu</h2>
+        </div>
 
-              {/* Live Loading State vs Data */}
-              {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-                  <div className="w-8 h-8 border-4 border-zinc-200 border-t-zaddys-red rounded-full animate-spin mb-4"></div>
-                  <p className="font-semibold text-sm">Warming up the ovens...</p>
+        <div id="menu" className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          {categories.map((category) => (
+            <button key={category} type="button" onClick={() => setActiveCategory(category)} className={`shrink-0 rounded-full border px-4 py-2 text-[12px] font-semibold transition ${activeCategory === category ? "border-zaddys-red bg-zaddys-red text-white" : "border-zaddys-border bg-white text-zaddys-gray"}`}>
+              {category}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 border-4 border-zinc-200 border-t-red-600 rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {visibleProducts.map((product, index) => (
+              <React.Fragment key={product.id}>
+              <Link href={`/product/${product.id}`} className="group flex min-w-0 flex-col rounded-xl border border-zaddys-border bg-zaddys-surface p-3 transition hover:border-zaddys-red">
+                <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-xl bg-white">
+                  {product.image ? (
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 512px) 42vw, 220px"
+                      className="object-cover transition group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-zinc-300 text-xs font-black uppercase tracking-widest bg-zinc-100">
+                      ZADDYS
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                   {filteredMenu.map((product) => (
-                     <Link key={product.id} href={`/product/${product.id}`}>
-                       <div className="bg-white rounded-3xl p-3 flex flex-col group cursor-pointer border border-zinc-100 shadow-sm hover:shadow-md transition h-full relative">
-                         <div className="w-full h-36 bg-zinc-100 rounded-2xl mb-3 overflow-hidden relative">
-                           {/* Load image from Django directly */}
-                           {product.image ? (
-                              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                           ) : (
-                              <div className="w-full h-full flex items-center justify-center text-zinc-300">No Image</div>
-                           )}
-                         </div>
-                         <h3 className="font-bold text-sm leading-tight mb-2 pr-6 text-black">{product.name}</h3>
-                         <div className="mt-auto">
-                             <span className="font-black text-sm text-zaddys-red">
-                               {product.is_custom_quote ? "Quote" : `₦${Number(product.price).toLocaleString()}`}
-                             </span>
-                         </div>
-                         <button className="absolute bottom-3 right-3 bg-zaddys-red text-white p-1.5 rounded-full shadow-md hover:bg-red-700">
-                           <Plus size={16} strokeWidth={3} />
-                         </button>
-                       </div>
-                     </Link>
-                   ))}
+                <span className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-zaddys-gray">{product.category_name}</span>
+                <h3 className="mb-2 line-clamp-2 text-[15px] font-semibold leading-5 text-zaddys-ink">{product.name}</h3>
+                <p className="mt-auto text-[14px] font-bold text-zaddys-red">
+                  {product.is_custom_quote ? "Custom Quote" : `₦${Number(product.price).toLocaleString()}`}
+                </p>
+              </Link>
+              {index === 3 && <div ref={secondRowMarker} className="pointer-events-none col-span-2 h-px" aria-hidden="true" />}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+      </div>
+      {showBackToTop && (
+              {showInstallPrompt && installPrompt && (
+                <div className="fixed bottom-24 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl bg-zaddys-black p-4 text-white shadow-2xl">
+                  <button type="button" aria-label="Close install prompt" onClick={() => setShowInstallPrompt(false)} className="absolute right-3 top-3 text-zinc-400"><X size={17} /></button>
+                  <div className="flex items-center gap-3"><Download className="text-red-400" size={22} /><div><p className="text-[13px] font-semibold">Install ZADDYS</p><p className="text-[11px] text-zinc-300">Keep your favourite moments one tap away.</p></div></div>
+                  <button type="button" onClick={installApp} className="mt-3 w-full rounded-xl bg-zaddys-red py-2.5 text-[12px] font-semibold">Install app</button>
                 </div>
               )}
-          </div>
-          {/* <DockNav /> */}
-        </div>
+        <button type="button" aria-label="Back to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="fixed bottom-24 right-4 z-40 rounded-full bg-zaddys-red p-3 text-white shadow-lg transition hover:bg-red-700">
+          <ArrowUp size={19} />
+        </button>
       )}
     </main>
   );

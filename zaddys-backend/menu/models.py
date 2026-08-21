@@ -1,91 +1,191 @@
-import uuid
-import random
 from django.db import models
 from django.contrib.auth.models import User
-
-class CustomerProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    phone = models.CharField(max_length=20, blank=True)
-    loyalty_points = models.PositiveIntegerField(default=0)
-    referral_code = models.CharField(max_length=10, unique=True, blank=True)
-    referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
-    otp_code = models.CharField(max_length=6, blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        if not self.referral_code:
-            self.referral_code = str(uuid.uuid4()).replace('-', '')[:8].upper()
-        super().save(*args, **kwargs)
-
-    def __str__(self): return self.user.username
-
-class PromoBanner(models.Model):
-    title = models.CharField(max_length=255)
-    promo_text = models.CharField(max_length=255, blank=True)
-    badge = models.CharField(max_length=50, blank=True, help_text="e.g., 'HOT 🔥', '-20%'")
-    image = models.ImageField(upload_to='banners/')
-    is_active = models.BooleanField(default=True)
-
-    def __str__(self): return self.title
+from django.utils import timezone
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
-    image = models.ImageField(upload_to='categories/', blank=True, null=True)
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return self.name
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
+    INVENTORY_STATUS_CHOICES = [
+        ('available', 'Available'),
+        ('out_of_stock', 'Out of stock'),
+        ('hidden', 'Hidden'),
+    ]
     name = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True)
-    description = models.TextField(blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    image = models.ImageField(upload_to='products/')
+    description = models.TextField(blank=True, null=True)
+    image = models.URLField(blank=True, null=True)
     is_available = models.BooleanField(default=True)
-    is_custom_quote = models.BooleanField(default=False)
+    inventory_status = models.CharField(max_length=20, choices=INVENTORY_STATUS_CHOICES, default='available')
+    is_custom_quote = models.BooleanField(default=False) # For Custom Celebration Cakes
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return self.name
 
-class OptionGroup(models.Model):
-    product = models.ForeignKey(Product, related_name='option_groups', on_delete=models.CASCADE)
+class ProductOptionGroup(models.Model):
+    """E.g., 'Noodle Type', 'Wing Quantity', 'Sauce Options'"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='option_groups')
     name = models.CharField(max_length=100)
     is_required = models.BooleanField(default=False)
-    is_multiple = models.BooleanField(default=False)
+    is_multiple = models.BooleanField(default=False) # True for checkboxes, False for radio
 
-    def __str__(self): return f"{self.product.name} - {self.name}"
+    def __str__(self):
+        return f"{self.product.name} - {self.name}"
 
-class OptionItem(models.Model):
-    group = models.ForeignKey(OptionGroup, related_name='items', on_delete=models.CASCADE)
+class ProductOption(models.Model):
+    """E.g., 'Egg Noodles', '6 Pieces', 'Extra Beef (+₦1500)'"""
+    group = models.ForeignKey(ProductOptionGroup, on_delete=models.CASCADE, related_name='options')
     name = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    price_extra = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
-    def __str__(self): return self.name
+    def __str__(self):
+        return f"{self.name} (+₦{self.price_extra})"
+
+class CustomerProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    referral_code = models.CharField(max_length=50, blank=True, null=True)
+    points = models.IntegerField(default=0)
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            import secrets
+            self.referral_code = f'ZD-{secrets.token_hex(4).upper()}'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.user.email
+
+class CustomerAddress(models.Model):
+    profile = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name='addresses')
+    label = models.CharField(max_length=80, default='Home')
+    address = models.TextField()
+    landmark = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.profile} - {self.label}'
+
+class SupportConversation(models.Model):
+    STATUS_CHOICES = [('open', 'Open'), ('closed', 'Closed')]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='support_conversations')
+    subject = models.CharField(max_length=160, default='Talk to ZADDY')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='open')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.user.email} - {self.subject}'
+
+class SupportMessage(models.Model):
+    conversation = models.ForeignKey(SupportConversation, on_delete=models.CASCADE, related_name='messages')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    body = models.TextField()
+    is_staff_reply = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.author} - {self.created_at:%Y-%m-%d %H:%M}'
+
+class Coupon(models.Model):
+    DISCOUNT_TYPES = [('percentage', 'Percentage'), ('fixed', 'Fixed amount')]
+    code = models.CharField(max_length=40, unique=True)
+    discount_type = models.CharField(max_length=20, choices=DISCOUNT_TYPES, default='percentage')
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    minimum_order = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    active = models.BooleanField(default=False)
+    starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
+    usage_limit = models.PositiveIntegerField(null=True, blank=True)
+    usage_count = models.PositiveIntegerField(default=0)
+
+    def is_valid(self):
+        now = timezone.now()
+        return (
+            self.active
+            and (self.starts_at is None or self.starts_at <= now)
+            and (self.ends_at is None or self.ends_at >= now)
+            and (self.usage_limit is None or self.usage_count < self.usage_limit)
+        )
+
+    def __str__(self):
+        return self.code
+
+class DeliveryZone(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'{self.name} - ₦{self.fee}'
+
+class LoyaltyTransaction(models.Model):
+    profile = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name='loyalty_transactions')
+    points_delta = models.IntegerField()
+    reason = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.profile} {self.points_delta:+d} points'
+
+class ReferralRecord(models.Model):
+    referrer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name='referrals_sent')
+    referred_customer = models.OneToOneField(CustomerProfile, on_delete=models.CASCADE, related_name='referral_record')
+    points_awarded = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.referrer} referred {self.referred_customer}'
 
 class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
-    customer_name = models.CharField(max_length=255, blank=True)
-    customer_email = models.EmailField(blank=True, null=True)
-    customer_phone = models.CharField(max_length=50)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', null=True, blank=True)
+    order_number = models.CharField(max_length=32, unique=True, blank=True, null=True)
+    customer_name = models.CharField(max_length=200, blank=True)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=20)
     delivery_address = models.TextField()
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    landmark = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    delivery_notes = models.TextField(blank=True)
+    preferred_delivery_time = models.CharField(max_length=100, blank=True)
+    delivery_zone = models.ForeignKey('DeliveryZone', on_delete=models.PROTECT, null=True, blank=True, related_name='orders')
+    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    coupon_code = models.CharField(max_length=40, blank=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_reference = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    transaction_id = models.CharField(max_length=100, blank=True)
+    payment_method = models.CharField(max_length=50, blank=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=50, default='Pending')
-    paystack_reference = models.CharField(max_length=100, blank=True)
-    delivery_pin = models.CharField(max_length=4, blank=True, help_text="4-digit pin for secure handoff")
+    is_paid = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        if not self.delivery_pin:
-            self.delivery_pin = str(random.randint(1000, 9999))
+        if not self.order_number:
+            from django.utils import timezone
+            prefix = timezone.localdate().strftime('ZD-%Y%m%d')
+            last_order = Order.objects.filter(order_number__startswith=prefix).order_by('-id').first()
+            sequence = int(last_order.order_number.rsplit('-', 1)[-1]) + 1 if last_order else 1
+            self.order_number = f'{prefix}-{sequence:04d}'
         super().save(*args, **kwargs)
 
-    def __str__(self): return f"Order {self.id} - {self.customer_name}"
+    def __str__(self):
+        return f"Order #{self.id} - ₦{self.total_price}"
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-    quantity = models.PositiveIntegerField(default=1)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    customizations = models.TextField(blank=True)
+    selected_options = models.TextField(blank=True, null=True) # Summary of options chosen
+
+    def __str__(self):
+        return f"{self.quantity}x {self.product.name}"

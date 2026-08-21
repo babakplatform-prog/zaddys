@@ -34,7 +34,7 @@ export default function VerifyOTP() {
       <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full mt-10 text-center">
         <h1 className="text-3xl font-black mb-2 tracking-tight">Verify Account</h1>
         <p className="text-zinc-400 text-sm mb-8 px-4">
-          We've sent a 6-digit code to your email. Enter it below to verify your account.
+          We&apos;ve sent a 6-digit code to your email. Enter it below to verify your account.
         </p>
 
         <div className="flex justify-center space-x-2 mb-8">
@@ -59,7 +59,7 @@ export default function VerifyOTP() {
         </button>
 
         <div className="mt-8 text-sm text-zinc-400">
-          Didn't receive the code? <span className="text-zaddys-red font-bold cursor-pointer">Resend (00:59)</span>
+          Didn&apos;t receive the code? <span className="text-zaddys-red font-bold cursor-pointer">Resend (00:59)</span>
         </div>
       </div>
     </main>

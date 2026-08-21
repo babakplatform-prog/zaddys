@@ -1,21 +1,25 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Package, Star, Gift, LogOut, Copy } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getAccessToken } from "@/services/authService";
+
+type Order = { id: number; order_number?: string; total_price: number | string; status: string };
+type Profile = { name: string; email: string; phone?: string; referral_code?: string; points: number; orders: Order[] };
 
 export default function ProfileDashboard() {
   const router = useRouter();
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // In a real flow, this email comes from NextAuth/Zustand state. 
-  // We'll mock it for now so you can see the UI immediately once we test!
-  const userEmail = "customer@zaddys.ng"; 
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
-    fetch(`${apiUrl}/profile/${userEmail}/`)
+    const token = getAccessToken();
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    fetch(`${apiUrl}/profile/`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) setUserData(data);
@@ -25,7 +29,13 @@ export default function ProfileDashboard() {
         console.error("Failed to load profile:", err);
         setLoading(false);
       });
-  }, []);
+  }, [router]);
+
+  const signOut = () => {
+    localStorage.removeItem("zaddys_access_token");
+    localStorage.removeItem("zaddys_refresh_token");
+    router.push("/");
+  };
 
   const copyReferral = () => {
     if (userData?.referral_code) {
@@ -87,20 +97,20 @@ export default function ProfileDashboard() {
           <h2 className="text-lg font-black text-black mb-3">Recent Orders</h2>
           {userData?.orders && userData.orders.length > 0 ? (
             <div className="space-y-3">
-              {userData.orders.map((order: any, idx: number) => (
+              {userData.orders.map((order, idx) => (
                 <div key={idx} className="bg-white p-4 rounded-3xl shadow-sm border border-zinc-100 flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="bg-zinc-100 p-3 rounded-2xl text-black">
                       <Package size={20} />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-black">Order #{order.id}</p>
+                    <Link href={`/track/${order.order_number || order.id}`} className="block">
+                      <p className="font-bold text-sm text-black">Order #{order.order_number || order.id}</p>
                       <p className="text-xs font-semibold text-zinc-500 mt-0.5">
                         <span className={order.status === "Pending" ? "text-orange-500" : "text-green-500"}>
                           {order.status}
                         </span>
                       </p>
-                    </div>
+                    </Link>
                   </div>
                   <div className="text-right">
                     <p className="font-black text-red-600 text-sm">₦{Number(order.total_price).toLocaleString()}</p>
@@ -116,7 +126,7 @@ export default function ProfileDashboard() {
         </div>
 
         {/* Logout Button */}
-        <button className="w-full bg-zinc-200 hover:bg-zinc-300 text-black font-bold py-4 rounded-2xl transition flex items-center justify-center space-x-2 mt-8">
+        <button onClick={signOut} className="w-full bg-zinc-200 hover:bg-zinc-300 text-black font-bold py-4 rounded-2xl transition flex items-center justify-center space-x-2 mt-8">
           <LogOut size={18} />
           <span>Sign Out</span>
         </button>

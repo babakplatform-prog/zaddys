@@ -3,18 +3,19 @@ from rest_framework import status, views
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from .models import CustomerProfile
+from .models import CustomerProfile, ReferralRecord, LoyaltyTransaction
 from .utils import send_welcome_email
 import resend
 from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken
 
 # Make sure you have your Resend utility setup correctly
-resend.api_key = getattr(settings, 'RESEND_API_KEY', 're_your_test_key_here')
+resend.api_key = getattr(settings, 'RESEND_API_KEY', '')
 
 def send_otp_email(user_email, otp_code):
     try:
         resend.Emails.send({
-            "from": "Zaddys Creamery & Grills <onboarding@zaddys.ng>",
+                "from": f"Zaddys Creamery & Grills <{settings.DEFAULT_FROM_EMAIL}>",
             "to": [user_email],
             "subject": "Your Zaddys Verification Code",
             "html": f"""
@@ -35,6 +36,7 @@ class RegisterView(views.APIView):
         email = request.data.get('email')
         password = request.data.get('password')
         phone = request.data.get('phone', '')
+        referral_code = request.data.get('referralCode', '').strip()
 
         if not email or not password:
             return Response({"error": "Email and password required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -42,10 +44,24 @@ class RegisterView(views.APIView):
             return Response({"error": "Account exists."}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create_user(username=username or email, email=email, password=password)
-        profile = CustomerProfile.objects.create(user=user, phone=phone, is_verified=True) # Auto-verify on fresh signup
+        profile = CustomerProfile.objects.create(user=user, phone=phone, is_verified=True)
+
+        if referral_code:
+            referrer = CustomerProfile.objects.filter(referral_code=referral_code).first()
+            if referrer and referrer != profile:
+                referral_points = 100
+                ReferralRecord.objects.create(referrer=referrer, referred_customer=profile, points_awarded=referral_points)
+                referrer.points += referral_points
+                referrer.save(update_fields=['points'])
+                LoyaltyTransaction.objects.create(profile=referrer, points_delta=referral_points, reason=f'Referral of {profile.user.email}')
         
         send_welcome_email(email, username or "Foodie")
-        return Response({"message": "Registered successfully!"}, status=status.HTTP_201_CREATED)
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "message": "Registered successfully!",
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }, status=status.HTTP_201_CREATED)
 
 class LoginView(views.APIView):
     def post(self, request):
@@ -85,7 +101,17 @@ class VerifyOTPView(views.APIView):
                 profile.is_verified = True
                 profile.otp_code = "" # Clear it after use
                 profile.save()
-                return Response({"message": "Verification successful"}, status=status.HTTP_200_OK)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "message": "Verification successful",
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "user": {
+                        "id": user.id,
+                        "name": user.get_full_name() or user.username,
+                        "email": user.email,
+                    },
+                }, status=status.HTTP_200_OK)
             else:
                 return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:

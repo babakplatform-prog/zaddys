@@ -3,6 +3,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+# ADD THESE 3 LINES TO RENAME YOUR ADMIN PANEL
+admin.site.site_header = "Zaddys Creamery and Grills Admin Panel"
+admin.site.site_title = "Zaddys Admin Portal"
+admin.site.index_title = "Welcome to Zaddys Control Panel"
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     
