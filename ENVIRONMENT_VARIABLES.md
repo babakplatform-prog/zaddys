@@ -4,6 +4,8 @@ The frontend uses the Next.js App Router. Keep public browser keys in Vercel and
 
 ## Frontend: `zaddys-frontend/.env.local` and Vercel
 
+Copy `zaddys-frontend/.env.example` to `zaddys-frontend/.env.local` for local development. Replace every placeholder before deploying. Vercel reads these same keys from Project Settings > Environment Variables.
+
 ```env
 NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
 NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_replace_me
@@ -23,6 +25,8 @@ TWITTER_CLIENT_SECRET=replace_me
 For production, set `NEXT_PUBLIC_API_URL` to the deployed Django API URL and `NEXTAUTH_URL` to the deployed frontend URL. `NEXT_PUBLIC_*` values are exposed to the browser. OAuth client secrets are server-side NextAuth secrets and must not be exposed through `NEXT_PUBLIC_*` names.
 
 ## Backend: `zaddys-backend/.env` and Django deployment
+
+Use `zaddys-backend/.env.example` as the complete template. Render reads these keys from the service Environment tab; do not upload `.env` files or commit real values.
 
 ```env
 SECRET_KEY=replace_with_a_long_random_django_secret
@@ -65,3 +69,39 @@ The Django app uses `DATABASE_URL` when supplied and otherwise falls back to loc
 ```powershell
 python manage.py seed_delivery_zones
 ```
+
+## Vercel setup
+
+Create a new project from this repository with:
+
+- **Root Directory:** `zaddys-frontend`
+- **Framework Preset:** Next.js
+- **Build Command:** `npm run build`
+- **Install Command:** `npm install` (default)
+- **Output Directory:** leave the default blank
+
+Add all variables from `zaddys-frontend/.env.example` to the Vercel Production environment, then redeploy. At minimum, replace `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`.
+
+## Render setup
+
+Create a Web Service from the same repository with:
+
+- **Name:** `zaddys-api`
+- **Runtime:** Python 3
+- **Root Directory:** `zaddys-backend`
+- **Build Command:** `pip install -r requirements.txt && python manage.py migrate`
+- **Start Command:** `gunicorn core.wsgi:application --bind 0.0.0.0:$PORT`
+- **Health Check Path:** `/api/products/`
+
+Add the backend variables from `zaddys-backend/.env.example`. Create a Render PostgreSQL database first and paste its **Internal Database URL** into `DATABASE_URL`. Set `ALLOWED_HOSTS` to the Render API hostname and `CORS_ALLOWED_ORIGINS` to the exact Vercel URL, comma-separated with any custom frontend domain.
+
+## Connect the deployments
+
+1. Deploy Render and copy its service URL, for example `https://zaddys-api.onrender.com`.
+2. Set Vercel `NEXT_PUBLIC_API_URL` to `https://zaddys-api.onrender.com/api`.
+3. Set Render `CORS_ALLOWED_ORIGINS` to the exact Vercel URL, for example `https://zaddys.vercel.app`.
+4. Redeploy both services after saving variables.
+5. Open `https://zaddys-api.onrender.com/api/products/` and confirm it returns menu data.
+6. Test signup, login, checkout, and support from the Vercel URL.
+
+Use matching Paystack modes: `pk_test_` with `sk_test_`, or `pk_live_` with `sk_live_`. Never put `PAYSTACK_SECRET_KEY`, `RESEND_API_KEY`, database credentials, or OAuth client secrets in Vercel `NEXT_PUBLIC_*` variables.

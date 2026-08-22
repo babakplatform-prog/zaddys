@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowUp, ChevronRight, Search, SlidersHorizontal, ShoppingBag } from "lucide-react";
-import { ChevronRight, Download, Search, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
+import { ArrowUp, ChevronRight, Download, Search, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 import { getAccessToken } from "@/services/authService";
 
@@ -240,14 +239,14 @@ export default function HomePage() {
           </div>
         )}
       </div>
-      {showBackToTop && (
-              {showInstallPrompt && installPrompt && (
+      {showInstallPrompt && installPrompt && (
                 <div className="fixed bottom-24 left-1/2 z-40 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl bg-zaddys-black p-4 text-white shadow-2xl">
                   <button type="button" aria-label="Close install prompt" onClick={() => setShowInstallPrompt(false)} className="absolute right-3 top-3 text-zinc-400"><X size={17} /></button>
                   <div className="flex items-center gap-3"><Download className="text-red-400" size={22} /><div><p className="text-[13px] font-semibold">Install ZADDYS</p><p className="text-[11px] text-zinc-300">Keep your favourite moments one tap away.</p></div></div>
                   <button type="button" onClick={installApp} className="mt-3 w-full rounded-xl bg-zaddys-red py-2.5 text-[12px] font-semibold">Install app</button>
                 </div>
-              )}
+      )}
+      {showBackToTop && (
         <button type="button" aria-label="Back to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="fixed bottom-24 right-4 z-40 rounded-full bg-zaddys-red p-3 text-white shadow-lg transition hover:bg-red-700">
           <ArrowUp size={19} />
         </button>
