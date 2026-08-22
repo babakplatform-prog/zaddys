@@ -102,6 +102,9 @@ export default function AuthPage() {
           <button onClick={() => setIsLogin(!isLogin)} className="text-zaddys-red font-bold hover:underline">
             {isLogin ? "Sign Up" : "Log In"}
           </button>
+          <Link href="/get-started" className="mt-4 block text-xs font-semibold text-zinc-400 transition hover:text-zaddys-red">
+            See the ZADDYS experience
+          </Link>
         </div>
       </div>
     </main>

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Bot, MessageCircle, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { ArrowLeft, Bot, MessageCircle, Minus, Plus, Share2, ShoppingBag, Wine, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
@@ -53,6 +53,17 @@ export default function ProductDetailPage() {
     const message = encodeURIComponent(`Hello ZADDYS! My name is ${customerName}. I would like to request a custom quote for the *${product.name}*.`);
     window.open(`https://wa.me/2349120220480?text=${message}`, "_blank", "noopener,noreferrer");
     setQuoteAssistantOpen(false);
+  };
+
+  const shareProduct = async () => {
+    if (!product) return;
+    const shareData = { title: product.name, text: product.description || `Check out ${product.name} at ZADDYS.`, url: window.location.href };
+    if (navigator.share) {
+      await navigator.share(shareData).catch(() => undefined);
+      return;
+    }
+    await navigator.clipboard.writeText(window.location.href);
+    alert("Product link copied. Send it to someone special.");
   };
 
   // Calculate dynamic price based on selected add-ons/variants
@@ -141,6 +152,14 @@ export default function ProductDetailPage() {
         <Link href="/" className="absolute top-6 left-4 bg-white/90 backdrop-blur p-2 rounded-full shadow-md text-black">
           <ArrowLeft size={22} />
         </Link>
+        <div className="absolute right-4 top-6 flex flex-col gap-2">
+          <button type="button" onClick={shareProduct} aria-label="Share this product" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-black shadow-md transition hover:bg-zaddys-red hover:text-white">
+            <Share2 size={19} />
+          </button>
+          <button type="button" onClick={() => router.push("/#menu")} aria-label="Browse drinks" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-black shadow-md transition hover:bg-zaddys-red hover:text-white">
+            <Wine size={19} />
+          </button>
+        </div>
       </div>
 
       {/* Details Card */}
@@ -153,6 +172,10 @@ export default function ProductDetailPage() {
         </div>
         
         <p className="text-xs text-zinc-400 font-bold uppercase tracking-wider mb-4">{product.category_name}</p>
+        <div className="mb-5 flex gap-2">
+          <button type="button" onClick={shareProduct} className="flex items-center gap-2 rounded-xl border border-zaddys-border bg-zaddys-surface px-3 py-2 text-xs font-bold text-zaddys-ink transition hover:border-zaddys-red"><Share2 size={15} /> Share</button>
+          <button type="button" onClick={() => router.push("/#menu")} className="flex items-center gap-2 rounded-xl border border-zaddys-border bg-zaddys-surface px-3 py-2 text-xs font-bold text-zaddys-ink transition hover:border-zaddys-red"><Wine size={15} /> Drinks</button>
+        </div>
         
         <div className="mb-6">
           <h3 className="font-bold text-black mb-1 text-sm">Description</h3>

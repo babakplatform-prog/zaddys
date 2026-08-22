@@ -16,6 +16,7 @@ declare module "lucide-react" {
   export const Apple: Icon;
   export const ArrowLeft: Icon;
   export const ArrowRight: Icon;
+  export const ArrowUpRight: Icon;
   export const ArrowUp: Icon;
   export const AtSign: Icon;
   export const AlertTriangle: Icon;
@@ -23,6 +24,7 @@ declare module "lucide-react" {
   export const Check: Icon;
   export const CheckCircle2: Icon;
   export const ChevronRight: Icon;
+  export const CircleHelp: Icon;
   export const Clock: Icon;
   export const Copy: Icon;
   export const Download: Icon;
@@ -47,6 +49,7 @@ declare module "lucide-react" {
   export const Plus: Icon;
   export const Search: Icon;
   export const Send: Icon;
+  export const Share2: Icon;
   export const ShoppingBag: Icon;
   export const ShoppingCart: Icon;
   export const SlidersHorizontal: Icon;
@@ -54,6 +57,7 @@ declare module "lucide-react" {
   export const Trash2: Icon;
   export const User: Icon;
   export const UsersRound: Icon;
+  export const Wine: Icon;
   export const X: Icon;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { ArrowLeft, Minus, Plus, Trash2, MapPin } from "lucide-react";
+import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAccessToken } from "@/services/authService";
@@ -201,11 +201,11 @@ export default function CartPage() {
 
       <div className="p-4 max-w-md mx-auto">
         <h2 className="font-bold text-black mb-3 text-sm uppercase tracking-wider">Order Summary</h2>
-        <div className="bg-white rounded-3xl p-4 shadow-sm mb-6 space-y-4 border border-zinc-100">
+        <div className="overflow-hidden rounded-3xl border border-zaddys-border bg-white shadow-sm mb-6">
           {cart.map((item) => (
-            <div key={item.id} className="flex items-center justify-between">
+            <div key={item.id} className="flex items-center justify-between gap-3 border-b border-zaddys-border p-4 last:border-b-0">
               <div className="flex items-center space-x-3">
-                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100">
+                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-zinc-100">
                   {item.image && (
                     <Image
                       src={item.image}
@@ -218,7 +218,7 @@ export default function CartPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-black">{item.name}</h3>
+                  <h3 className="font-bold text-sm leading-5 text-black">{item.name}</h3>
                   <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
                     <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-black"><Minus size={12} /></button>
                     <span>{item.quantity}</span>
@@ -227,7 +227,7 @@ export default function CartPage() {
                   <p className="text-sm font-black text-red-600">₦{(item.price * item.quantity).toLocaleString()}</p>
                 </div>
               </div>
-              <button onClick={() => removeFromCart(item.id)} className="p-2 text-zinc-400 hover:text-red-600 transition">
+              <button aria-label={`Remove ${item.name}`} onClick={() => removeFromCart(item.id)} className="rounded-xl p-2 text-zinc-400 transition hover:bg-red-50 hover:text-red-600">
                 <Trash2 size={18} />
               </button>
             </div>
@@ -285,7 +285,7 @@ export default function CartPage() {
           <textarea value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} placeholder="Delivery Notes (Optional)" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" rows={3} />
         </form>
 
-        <div className="bg-black text-white rounded-3xl p-5 shadow-lg mb-4">
+        <div className="rounded-3xl bg-zaddys-black p-5 text-white shadow-lg shadow-black/15 mb-4">
           <div className="flex justify-between items-center mb-2 text-sm text-zinc-400">
             <span>Subtotal</span><span>₦{cartTotal.toLocaleString()}</span>
           </div>
@@ -304,8 +304,9 @@ export default function CartPage() {
       <div className="fixed bottom-[4.7rem] left-1/2 z-40 w-full max-w-lg -translate-x-1/2 border-t border-zaddys-border bg-white/95 p-4 backdrop-blur">
         <button 
           form="checkout-form" type="submit" disabled={isProcessing}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-lg transition flex items-center justify-center uppercase tracking-wide text-sm"
+          className="w-full rounded-2xl bg-zaddys-red py-4 text-sm font-black uppercase tracking-wide text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700 flex items-center justify-center gap-2"
         >
+          <ShoppingBag size={18} />
           {isProcessing ? "Processing..." : `Pay ₦${payableTotal.toLocaleString()}`}
         </button>
       </div>
