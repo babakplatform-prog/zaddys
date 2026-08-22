@@ -15,8 +15,7 @@
     "next-auth": "^4.24.15",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-google-autocomplete": "^2.7.5",
-    "react-paystack": "^6.0.0"
+    "react-google-autocomplete": "^2.7.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
