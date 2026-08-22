@@ -28,6 +28,15 @@ For production, set `NEXT_PUBLIC_API_URL` to the deployed Django API URL and `NE
 
 Use `zaddys-backend/.env.example` as the complete template. Render reads these keys from the service Environment tab; do not upload `.env` files or commit real values.
 
+Render automatically populates an empty production database during its build command. No Shell access is required:
+
+```bash
+python manage.py seed_menu
+python manage.py seed_delivery_zones
+```
+
+The menu seed is intentionally non-destructive: it will not overwrite an existing catalog or orders.
+
 ```env
 SECRET_KEY=replace_with_a_long_random_django_secret
 DEBUG=False
@@ -90,7 +99,7 @@ Create a Web Service from the same repository with:
 - **Name:** `zaddys-api`
 - **Runtime:** Python 3
 - **Root Directory:** `zaddys-backend`
-- **Build Command:** `pip install -r requirements.txt && python manage.py migrate`
+- **Build Command:** `pip install -r requirements.txt && python manage.py migrate && python manage.py seed_menu && python manage.py seed_delivery_zones`
 - **Start Command:** `gunicorn core.wsgi:application --bind 0.0.0.0:$PORT`
 - **Health Check Path:** `/api/products/`
 

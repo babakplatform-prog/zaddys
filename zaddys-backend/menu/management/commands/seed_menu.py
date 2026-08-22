@@ -7,9 +7,11 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write("Seeding Zaddys Menu...")
 
-        # Clear old data to prevent duplication
-        Product.objects.all().delete()
-        Category.objects.all().delete()
+        if Category.objects.exists() or Product.objects.exists():
+            self.stdout.write(self.style.WARNING(
+                "Menu data already exists; nothing was changed."
+            ))
+            return
 
         # 1. CREAMERY
         cat_creamery = Category.objects.create(name="Creamery")
