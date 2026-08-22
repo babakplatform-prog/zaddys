@@ -31,3 +31,7 @@ class UserProfileView(views.APIView):
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except CustomerProfile.DoesNotExist:
             return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request):
+        request.user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -36,6 +36,14 @@ class CreateOrderView(views.APIView):
             return Response({'error': 'Payment reference and cart are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            existing_order = Order.objects.filter(payment_reference=reference, user=request.user).first()
+            if existing_order:
+                return Response({
+                    'message': 'Order already created.',
+                    'order_id': existing_order.id,
+                    'order_number': existing_order.order_number,
+                }, status=status.HTTP_200_OK)
+
             verification = requests.get(
                 f'https://api.paystack.co/transaction/verify/{reference}',
                 headers={'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}'},
@@ -115,5 +123,5 @@ class CreateOrderView(views.APIView):
             }, status=status.HTTP_201_CREATED)
         except requests.RequestException:
             return Response({'error': 'Unable to verify payment right now.'}, status=status.HTTP_502_BAD_GATEWAY)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({'error': 'Unable to create this order.'}, status=status.HTTP_400_BAD_REQUEST)

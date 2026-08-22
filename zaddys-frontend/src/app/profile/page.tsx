@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Package, Star, Gift, LogOut, Copy } from "lucide-react";
+import { ArrowLeft, Package, Star, Gift, LogOut, Copy, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAccessToken } from "@/services/authService";
@@ -33,6 +33,22 @@ export default function ProfileDashboard() {
   }, [router]);
 
   const signOut = () => {
+    localStorage.removeItem("zaddys_access_token");
+    localStorage.removeItem("zaddys_refresh_token");
+    router.push("/");
+  };
+
+  const deleteAccount = async () => {
+    if (!window.confirm("Delete your account permanently? Completed orders will be retained without your account details.")) return;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+    const res = await fetch(`${apiUrl}/profile/`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${getAccessToken()}` },
+    });
+    if (!res.ok) {
+      alert("We could not delete your account. Please try again or contact support.");
+      return;
+    }
     localStorage.removeItem("zaddys_access_token");
     localStorage.removeItem("zaddys_refresh_token");
     router.push("/");
@@ -130,6 +146,10 @@ export default function ProfileDashboard() {
         <button onClick={signOut} className="w-full bg-zinc-200 hover:bg-zinc-300 text-black font-bold py-4 rounded-2xl transition flex items-center justify-center space-x-2 mt-8">
           <LogOut size={18} />
           <span>Sign Out</span>
+        </button>
+        <button onClick={deleteAccount} className="w-full border border-red-200 bg-white text-red-600 font-bold py-4 rounded-2xl transition hover:bg-red-50 flex items-center justify-center space-x-2">
+          <Trash2 size={18} />
+          <span>Delete Account</span>
         </button>
       </div>
     </main>

@@ -146,7 +146,7 @@ class ReferralRecord(models.Model):
         return f'{self.referrer} referred {self.referred_customer}'
 
 class Order(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='orders', null=True, blank=True)
     order_number = models.CharField(max_length=32, unique=True, blank=True, null=True)
     customer_name = models.CharField(max_length=200, blank=True)
     email = models.EmailField(blank=True)
