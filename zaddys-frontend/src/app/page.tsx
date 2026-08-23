@@ -117,18 +117,11 @@ export default function HomePage() {
   // ==========================================
   if (showSplash) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white relative overflow-hidden">
-        <div className="relative w-36 h-36 animate-[spin_4s_linear_infinite]">
-          <Image
-            src="/zaddys-logo.jpg"
-            alt="Zaddys Logo"
-            fill
-            priority
-            sizes="144px"
-            className="object-contain drop-shadow-md"
-          />
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white text-zaddys-red">
+        <div className="flex h-36 w-36 animate-[spin_2s_linear_infinite] items-center justify-center rounded-full border-4 border-zaddys-red bg-white shadow-lg shadow-red-900/10">
+          <span className="text-2xl font-black tracking-[0.08em]" aria-label="ZADDYS">ZADDYS</span>
         </div>
-        <p className="absolute bottom-12 text-white font-semibold uppercase tracking-[0.3em] text-xs animate-pulse">
+        <p className="absolute bottom-12 text-xs font-semibold uppercase tracking-[0.3em] text-zaddys-red animate-pulse">
           Made for moments.
         </p>
       </div>
