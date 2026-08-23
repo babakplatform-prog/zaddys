@@ -25,6 +25,7 @@ export default function HomePage() {
     const [installPrompt, setInstallPrompt] = useState<Event & { prompt?: () => Promise<void> } | null>(null);
     const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [menuError, setMenuError] = useState("");
   const secondRowMarker = React.useRef<HTMLDivElement | null>(null);
 
   const getGreeting = () => {
@@ -38,7 +39,7 @@ export default function HomePage() {
     // Splash screen timer (1.8 - 2 seconds as per brand design brief)
     const splashTimer = setTimeout(() => setShowSplash(false), 2000); 
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://zaddys.onrender.com/api";
     
     const token = getAccessToken();
     const profileRequest = token
@@ -48,13 +49,17 @@ export default function HomePage() {
       : Promise.resolve();
 
     fetch(`${apiUrl}/products/`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`Menu request failed with ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         setProducts(Array.isArray(data) ? data : data.results || []);
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load live menu:", err);
+        setMenuError("The menu is taking a moment to load. Please refresh shortly.");
         setLoading(false);
       });
 
@@ -200,6 +205,16 @@ export default function HomePage() {
             <div className="w-8 h-8 border-4 border-zinc-200 border-t-red-600 rounded-full animate-spin"></div>
           </div>
         ) : (
+          menuError ? (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-center">
+              <p className="text-sm font-semibold text-zaddys-ink">{menuError}</p>
+              <button type="button" onClick={() => window.location.reload()} className="mt-3 rounded-xl bg-zaddys-red px-4 py-2 text-xs font-bold text-white">Refresh menu</button>
+            </div>
+          ) : visibleProducts.length === 0 ? (
+            <div className="rounded-2xl border border-zaddys-border bg-zaddys-surface p-5 text-center text-sm text-zaddys-gray">
+              Menu items are being prepared. Please check back shortly.
+            </div>
+          ) : (
           <div className="grid grid-cols-2 gap-4">
             {visibleProducts.map((product, index) => (
               <React.Fragment key={product.id}>
@@ -230,6 +245,7 @@ export default function HomePage() {
               </React.Fragment>
             ))}
           </div>
+          )
         )}
       </div>
       {showInstallPrompt && installPrompt && (
