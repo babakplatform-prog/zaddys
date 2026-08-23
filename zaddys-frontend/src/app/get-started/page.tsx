@@ -53,6 +53,10 @@ export default function GetStartedPage() {
           <span aria-hidden="true">|</span>
           <Link href="/" className="transition hover:text-white">Browse menu</Link>
         </div>
+        <div className="mt-4 flex justify-center gap-5 text-[11px] text-zinc-600">
+          <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
+          <Link href="/terms" className="transition hover:text-white">Terms</Link>
+        </div>
       </div>
     </main>
   );

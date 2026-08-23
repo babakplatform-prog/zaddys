@@ -19,11 +19,46 @@ html {
   background: #ffffff;
 }
 
+html.dark {
+  background: #121212;
+}
+
 body {
   background-color: #ffffff;
   color: var(--z-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 70;
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--z-border);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--z-ink);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.dark body,
+.dark .app-content,
+.dark .app-frame {
+  background-color: var(--z-black) !important;
+  color: #f5f5f5;
+}
+
+.dark .theme-toggle {
+  border-color: #3a3a3a;
+  background: rgba(30, 30, 30, 0.92);
+  color: #ffffff;
 }
 
 button,

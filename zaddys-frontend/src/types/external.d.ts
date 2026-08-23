@@ -19,6 +19,8 @@ declare module "lucide-react" {
   export const ArrowUpRight: Icon;
   export const ArrowUp: Icon;
   export const AtSign: Icon;
+  export const Monitor: Icon;
+  export const Moon: Icon;
   export const AlertTriangle: Icon;
   export const Bot: Icon;
   export const Check: Icon;
@@ -54,6 +56,7 @@ declare module "lucide-react" {
   export const ShoppingCart: Icon;
   export const SlidersHorizontal: Icon;
   export const Star: Icon;
+  export const Sun: Icon;
   export const Trash2: Icon;
   export const User: Icon;
   export const UsersRound: Icon;

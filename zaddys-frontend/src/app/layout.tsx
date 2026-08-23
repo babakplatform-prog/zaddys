@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css"; // THIS LINE FIXES THE PLAIN TEXT!
 import { CartProvider } from "@/context/CartContext";
 import DockNav from "@/components/DockNav"; // BRINGS BACK THE DOCK
+import ThemeToggle from "@/components/ThemeToggle";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <CartProvider>
           <div className="app-content">
+            <ThemeToggle />
             {children}
             <DockNav />
           </div>

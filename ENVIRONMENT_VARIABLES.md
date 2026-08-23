@@ -71,6 +71,9 @@ Restrict the key API list to the APIs required by the checkout address autocompl
 
 - `RESEND_API_KEY` stays on Django only.
 - `DEFAULT_FROM_EMAIL` must be a verified sender/domain in Resend, for example `orders@zaddys.ng`.
+- In Resend, open **Domains**, add `zaddys.ng`, and publish the TXT/DKIM records Resend gives you at your DNS provider.
+- Wait until Resend marks the domain **Verified**, then keep `DEFAULT_FROM_EMAIL=orders@zaddys.ng` in Render.
+- Resend email is currently wired for registration welcome messages and login OTP messages. Payment/order emails require a separate order-notification implementation.
 
 ## Database and menu
 
@@ -113,5 +116,7 @@ Add the backend variables from `zaddys-backend/.env.example`. Create a Render Po
 4. Redeploy both services after saving variables.
 5. Open `https://zaddys-api.onrender.com/api/products/` and confirm it returns menu data.
 6. Test signup, login, checkout, and support from the Vercel URL.
+
+For the custom frontend domain, set `NEXTAUTH_URL` to the exact HTTPS domain, update every OAuth callback URL to that domain, and add the same domain to Render `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS`.
 
 Use matching Paystack modes: `pk_test_` with `sk_test_`, or `pk_live_` with `sk_live_`. Never put `PAYSTACK_SECRET_KEY`, `RESEND_API_KEY`, database credentials, or OAuth client secrets in Vercel `NEXT_PUBLIC_*` variables.
