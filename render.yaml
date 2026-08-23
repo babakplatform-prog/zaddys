@@ -5,7 +5,7 @@ services:
     rootDir: zaddys-backend
     buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py seed_menu && python manage.py seed_delivery_zones
     startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
-    healthCheckPath: /api/products/
+    healthCheckPath: /
     envVars:
       - key: SECRET_KEY
         sync: false

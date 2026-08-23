@@ -104,7 +104,7 @@ Create a Web Service from the same repository with:
 - **Root Directory:** `zaddys-backend`
 - **Build Command:** `pip install -r requirements.txt && python manage.py migrate && python manage.py seed_menu && python manage.py seed_delivery_zones`
 - **Start Command:** `gunicorn core.wsgi:application --bind 0.0.0.0:$PORT`
-- **Health Check Path:** `/api/products/`
+- **Health Check Path:** `/`
 
 Add the backend variables from `zaddys-backend/.env.example`. Create a Render PostgreSQL database first and paste its **Internal Database URL** into `DATABASE_URL`. Set `ALLOWED_HOSTS` to the Render API hostname and `CORS_ALLOWED_ORIGINS` to the exact Vercel URL, comma-separated with any custom frontend domain.
 
