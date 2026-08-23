@@ -4,7 +4,7 @@ from .views import ProductViewSet, DeliveryZoneViewSet, ValidateCouponView, Supp
 from .views_auth import RegisterView, LoginView, VerifyOTPView
 from .views_order import CreateOrderView, OrderTrackingView
 from .views_profile import UserProfileView
-from .views_webhook import PaystackWebhookView
+from .views_webhook import PaystackWebhookView, ResendWebhookView
 
 router = DefaultRouter()
 router.register(r'products', ProductViewSet)
@@ -25,4 +25,5 @@ urlpatterns = [
     path('support/conversation/', SupportConversationView.as_view(), name='support-conversation'),
     path('profile/', UserProfileView.as_view(), name='user-profile'),
     path('webhooks/paystack/', PaystackWebhookView.as_view(), name='paystack-webhook'),
+    path('webhooks/resend/', ResendWebhookView.as_view(), name='resend-webhook'),
 ]

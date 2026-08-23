@@ -1,13 +1,15 @@
 import hashlib
 import hmac
 import json
+import base64
+import time
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from .models import CustomerProfile, DeliveryZone, Order, Product, Category
+from .models import CustomerProfile, DeliveryZone, Order, Product, Category, ResendWebhookEvent
 
 
 class AccountDeletionTests(TestCase):
@@ -69,3 +71,47 @@ class PaystackWebhookTests(TestCase):
 		order.refresh_from_db()
 		self.assertTrue(order.is_paid)
 		self.assertEqual(order.transaction_id, '42')
+
+
+class ResendWebhookTests(TestCase):
+	def setUp(self):
+		self.client = APIClient()
+		self.secret_bytes = b'resend-webhook-secret'
+		self.secret = 'whsec_' + base64.b64encode(self.secret_bytes).decode()
+		self.settings = patch('menu.views_webhook.settings.RESEND_WEBHOOK_SECRET', self.secret)
+		self.settings.start()
+		self.addCleanup(self.settings.stop)
+
+	def signed_request(self, event_id='msg-1', timestamp=None):
+		timestamp = str(timestamp or int(time.time()))
+		body = json.dumps({
+			'type': 'email.delivered',
+			'data': {'email_id': 'email-1'},
+		}).encode()
+		signed_content = f'{event_id}.{timestamp}.'.encode() + body
+		signature = base64.b64encode(hmac.new(self.secret_bytes, signed_content, hashlib.sha256).digest()).decode()
+		return body, {
+			'HTTP_SVIX_ID': event_id,
+			'HTTP_SVIX_TIMESTAMP': timestamp,
+			'HTTP_SVIX_SIGNATURE': f'v1,{signature}',
+		}
+
+	def test_valid_event_is_saved_once(self):
+		body, headers = self.signed_request()
+		response = self.client.post('/api/webhooks/resend/', data=body, content_type='application/json', **headers)
+		duplicate = self.client.post('/api/webhooks/resend/', data=body, content_type='application/json', **headers)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(duplicate.json(), {'received': True, 'duplicate': True})
+		self.assertEqual(ResendWebhookEvent.objects.count(), 1)
+
+	def test_invalid_signature_is_rejected(self):
+		body, headers = self.signed_request()
+		headers['HTTP_SVIX_SIGNATURE'] = 'v1,invalid'
+		response = self.client.post('/api/webhooks/resend/', data=body, content_type='application/json', **headers)
+		self.assertEqual(response.status_code, 401)
+
+	def test_expired_event_is_rejected(self):
+		body, headers = self.signed_request(timestamp=int(time.time()) - 301)
+		response = self.client.post('/api/webhooks/resend/', data=body, content_type='application/json', **headers)
+		self.assertEqual(response.status_code, 401)

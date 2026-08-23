@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductOptionGroup, ProductOption, Order, OrderItem, CustomerProfile, CustomerAddress, Coupon, DeliveryZone, LoyaltyTransaction, ReferralRecord, SupportConversation, SupportMessage
+from .models import Category, Product, ProductOptionGroup, ProductOption, Order, OrderItem, CustomerProfile, CustomerAddress, Coupon, DeliveryZone, LoyaltyTransaction, ReferralRecord, SupportConversation, SupportMessage, ResendWebhookEvent
 
 class ProductOptionGroupInline(admin.TabularInline):
     model = ProductOptionGroup
@@ -94,6 +94,12 @@ class SupportConversationAdmin(admin.ModelAdmin):
     list_filter = ['status', 'updated_at']
     search_fields = ['user__email', 'subject', 'messages__body']
 
+class ResendWebhookEventAdmin(admin.ModelAdmin):
+    list_display = ['event_type', 'email_id', 'event_id', 'received_at']
+    list_filter = ['event_type', 'received_at']
+    search_fields = ['event_id', 'email_id', 'event_type']
+    readonly_fields = ['event_id', 'event_type', 'email_id', 'payload', 'received_at']
+
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Category)
 admin.site.register(Order, OrderAdmin)
@@ -105,3 +111,4 @@ admin.site.register(DeliveryZone)
 admin.site.register(LoyaltyTransaction, LoyaltyTransactionAdmin)
 admin.site.register(ReferralRecord, ReferralRecordAdmin)
 admin.site.register(SupportConversation, SupportConversationAdmin)
+admin.site.register(ResendWebhookEvent, ResendWebhookEventAdmin)

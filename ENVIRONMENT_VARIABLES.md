@@ -74,6 +74,9 @@ Restrict the key API list to the APIs required by the checkout address autocompl
 - In Resend, open **Domains**, add `zaddys.ng`, and publish the TXT/DKIM records Resend gives you at your DNS provider.
 - Wait until Resend marks the domain **Verified**, then keep `DEFAULT_FROM_EMAIL=orders@zaddys.ng` in Render.
 - Resend email is currently wired for registration welcome messages and login OTP messages. Payment/order emails require a separate order-notification implementation.
+- Add a Resend webhook pointing to `https://api.zaddys.ng/api/webhooks/resend/` and select `email.sent`, `email.delivered`, `email.bounced`, and `email.failed`.
+- Copy the signing secret Resend provides into Render as `RESEND_WEBHOOK_SECRET`. This is separate from `RESEND_API_KEY`.
+- After deployment, delivery events are available in Django Admin under **Resend webhook events**.
 
 ## Database and menu
 

@@ -95,6 +95,16 @@ class SupportMessage(models.Model):
     def __str__(self):
         return f'{self.author} - {self.created_at:%Y-%m-%d %H:%M}'
 
+class ResendWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True)
+    event_type = models.CharField(max_length=100)
+    email_id = models.CharField(max_length=255, blank=True)
+    payload = models.JSONField()
+    received_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.event_type} - {self.event_id}'
+
 class Coupon(models.Model):
     DISCOUNT_TYPES = [('percentage', 'Percentage'), ('fixed', 'Fixed amount')]
     code = models.CharField(max_length=40, unique=True)
