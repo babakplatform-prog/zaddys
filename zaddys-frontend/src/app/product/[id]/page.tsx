@@ -132,7 +132,7 @@ export default function ProductDetailPage() {
   if (!product) return <div className="min-h-screen bg-white text-black p-6">Product not found.</div>;
 
   return (
-    <main className="min-h-screen bg-white pb-32 font-sans text-black">
+    <main className="min-h-screen bg-white pb-44 font-sans text-black">
       {/* Header Image Section */}
       <div className="relative w-full h-80 bg-zinc-100">
         {product.image ? (
@@ -226,7 +226,7 @@ export default function ProductDetailPage() {
 
         {/* Quantity Selector */}
         {!product.is_custom_quote && (
-          <div className="flex items-center justify-between bg-zinc-100 rounded-2xl p-2 w-36 mb-8">
+          <div className="mb-6 flex w-36 items-center justify-between rounded-2xl bg-zinc-100 p-2">
             <button 
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
               className="p-2 bg-white rounded-xl shadow-sm text-black"
@@ -242,10 +242,17 @@ export default function ProductDetailPage() {
             </button>
           </div>
         )}
+
+        {!product.is_custom_quote && (
+          <button type="button" onClick={handleAddToCart} className="mb-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-zaddys-red py-4 text-sm font-black uppercase tracking-wide text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700 active:scale-[0.99]">
+            <ShoppingBag size={19} />
+            <span>Add to Cart - ₦{(calculatedPrice * quantity).toLocaleString()}</span>
+          </button>
+        )}
       </div>
 
       {/* Floating Action CTA */}
-      <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 border-t border-zinc-100 bg-white/95 p-4 backdrop-blur">
+      <div className="fixed bottom-[5.4rem] left-1/2 z-[55] w-full max-w-lg -translate-x-1/2 border-t border-zinc-100 bg-white/95 p-4 pb-3 backdrop-blur">
         {product.is_custom_quote ? (
           <button 
             onClick={() => setQuoteAssistantOpen(true)}

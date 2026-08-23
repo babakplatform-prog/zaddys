@@ -36,7 +36,7 @@ export default function OrderSuccess() {
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        <Link href="/profile">
+        <Link href={orderNumber !== "Unavailable" ? `/track/${orderNumber}` : "/profile"}>
           <span className="flex w-full items-center justify-center gap-2 rounded-xl bg-zaddys-black py-4 font-semibold text-white transition hover:bg-zinc-800"><span>Track Order Status</span><ChevronRight size={18} /></span>
         </Link>
         <Link href="/">

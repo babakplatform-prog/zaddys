@@ -18,7 +18,7 @@ class AccountDeletionTests(TestCase):
 		self.client.force_authenticate(self.user)
 
 	def test_delete_account_removes_user_and_keeps_order_history_anonymous(self):
-		zone = DeliveryZone.objects.create(name='Tanke', fee=500)
+		zone, _ = DeliveryZone.objects.get_or_create(name='Test Zone', defaults={'fee': 500})
 		order = Order.objects.create(
 			user=self.user,
 			customer_name='Customer',

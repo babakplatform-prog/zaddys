@@ -25,58 +25,14 @@ export default function AuthPage() {
           {isLogin ? "Log in to access your moments." : "Create an account to start ordering."}
         </p>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          {!isLogin && (
-            <div>
-              <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Full Name</label>
-              <input 
-                type="text" 
-                placeholder="John Doe" 
-                className="w-full bg-zinc-100 border border-zinc-200 rounded-xl px-4 py-3 text-black focus:outline-none focus:border-zaddys-red transition"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Email Address</label>
-            <input 
-              type="email" 
-              placeholder="you@example.com" 
-              className="w-full bg-zinc-100 border border-zinc-200 rounded-xl px-4 py-3 text-black focus:outline-none focus:border-zaddys-red transition"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              className="w-full bg-zinc-100 border border-zinc-200 rounded-xl px-4 py-3 text-black focus:outline-none focus:border-zaddys-red transition"
-            />
-          </div>
-
-          {/* NEW: Confirm Password Field */}
-          {!isLogin && (
-            <div>
-              <label className="block text-xs font-bold text-zinc-500 uppercase mb-1">Confirm Password</label>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                className="w-full bg-zinc-100 border border-zinc-200 rounded-xl px-4 py-3 text-black focus:outline-none focus:border-zaddys-red transition"
-              />
-            </div>
-          )}
-
-          {isLogin && (
-            <div className="flex justify-end">
-              <span className="text-xs text-zaddys-red font-semibold cursor-pointer hover:underline">Forgot Password?</span>
-            </div>
-          )}
-
-          <button className="w-full bg-zaddys-red text-white font-bold rounded-xl py-3.5 mt-4 hover:bg-red-700 transition shadow-lg shadow-red-900/20">
+        <div className="space-y-3">
+          <Link href={isLogin ? "/login" : "/signup"} className="block w-full rounded-xl bg-zaddys-red py-3.5 text-center font-bold text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700">
             {isLogin ? "Log In" : "Sign Up"}
-          </button>
-        </form>
+          </Link>
+          <Link href="/get-started" className="block w-full rounded-xl border border-zaddys-border bg-white py-3.5 text-center font-semibold text-zaddys-black transition hover:border-zaddys-red">
+            View the ZADDYS experience
+          </Link>
+        </div>
 
         <div className="mt-8 flex flex-col items-center">
           <span className="text-xs text-zinc-500 uppercase font-bold mb-4">Or continue with</span>

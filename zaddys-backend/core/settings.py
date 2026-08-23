@@ -133,6 +133,7 @@ from datetime import timedelta
 
 INSTALLED_APPS += ['rest_framework']
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',') if origin.strip()]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', ','.join(CORS_ALLOWED_ORIGINS)).split(',') if origin.strip()]
 
 # Configure Django REST Framework and JWT Auth
 REST_FRAMEWORK = {
