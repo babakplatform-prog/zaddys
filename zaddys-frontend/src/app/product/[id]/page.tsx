@@ -243,12 +243,6 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {!product.is_custom_quote && (
-          <button type="button" onClick={handleAddToCart} className="mb-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-zaddys-red py-4 text-sm font-black uppercase tracking-wide text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700 active:scale-[0.99]">
-            <ShoppingBag size={19} />
-            <span>Add to Cart - ₦{(calculatedPrice * quantity).toLocaleString()}</span>
-          </button>
-        )}
       </div>
 
       {/* Floating Action CTA */}
