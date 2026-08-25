@@ -28,7 +28,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
           >
             <div className="rounded-[2rem] border-2 border-zaddys-red bg-white p-5 shadow-[0_18px_50px_rgba(201,20,20,0.16)]">
-              <Image src="/zaddys-logo.jpg" alt="Zaddy's Creamery and Grills" width={260} height={140} className="h-auto w-60 object-contain" priority />
+              <Image src="/zaddys-logo.png" alt="Zaddy's Creamery and Grills" width={260} height={140} className="h-auto w-60 object-contain" priority />
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="mt-7 text-center">
