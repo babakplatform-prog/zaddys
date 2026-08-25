@@ -16,10 +16,8 @@ GOOGLE_CLIENT_ID=replace_me
 GOOGLE_CLIENT_SECRET=replace_me
 APPLE_ID=replace_me
 APPLE_SECRET=replace_me
-FACEBOOK_CLIENT_ID=replace_me
-FACEBOOK_CLIENT_SECRET=replace_me
-TWITTER_CLIENT_ID=replace_me
-TWITTER_CLIENT_SECRET=replace_me
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=replace_me
+APPLE_CLIENT_ID=replace_me
 ```
 
 For production, set `NEXT_PUBLIC_API_URL` to the deployed Django API URL and `NEXTAUTH_URL` to the deployed frontend URL. `NEXT_PUBLIC_*` values are exposed to the browser. OAuth client secrets are server-side NextAuth secrets and must not be exposed through `NEXT_PUBLIC_*` names.
@@ -43,8 +41,11 @@ DEBUG=False
 ALLOWED_HOSTS=api.zaddys.ng
 CORS_ALLOWED_ORIGINS=https://www.zaddys.ng,https://your-project.vercel.app
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
-PAYSTACK_SECRET_KEY=sk_live_replace_me
+PAYSTACK_TEST_SECRET_KEY=sk_test_replace_me
+PAYSTACK_WEBHOOK_SECRET=whsec_replace_me
+PAYSTACK_SECRET_KEY=sk_test_replace_me
 RESEND_API_KEY=re_replace_me
+EMAIL_SERVICE_API_KEY=re_replace_me
 DEFAULT_FROM_EMAIL=orders@zaddys.ng
 ```
 
@@ -73,7 +74,7 @@ Restrict the key API list to the APIs required by the checkout address autocompl
 - `DEFAULT_FROM_EMAIL` must be a verified sender/domain in Resend, for example `orders@zaddys.ng`.
 - In Resend, open **Domains**, add `zaddys.ng`, and publish the TXT/DKIM records Resend gives you at your DNS provider.
 - Wait until Resend marks the domain **Verified**, then keep `DEFAULT_FROM_EMAIL=orders@zaddys.ng` in Render.
-- Resend email is currently wired for registration welcome messages and login OTP messages. Payment/order emails require a separate order-notification implementation.
+- Resend email is wired for registration OTPs, welcome messages, order confirmations, and order-status updates.
 - Add a Resend webhook pointing to `https://api.zaddys.ng/api/webhooks/resend/` and select `email.sent`, `email.delivered`, `email.bounced`, and `email.failed`.
 - Copy the signing secret Resend provides into Render as `RESEND_WEBHOOK_SECRET`. This is separate from `RESEND_API_KEY`.
 - After deployment, delivery events are available in Django Admin under **Resend webhook events**.

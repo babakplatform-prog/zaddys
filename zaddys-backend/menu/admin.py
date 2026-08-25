@@ -15,10 +15,18 @@ class ProductOptionGroupAdmin(admin.ModelAdmin):
     list_display = ['product', 'name', 'is_required', 'is_multiple']
     list_filter = ['is_required', 'is_multiple']
 
+class ProductOptionAdmin(admin.ModelAdmin):
+    list_display = ['name', 'group', 'price_extra', 'image']
+    list_filter = ['group__product']
+    search_fields = ['name', 'group__name', 'group__product__name']
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ['product', 'quantity', 'price', 'selected_options']
+
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ['order', 'product', 'quantity', 'price']
+    search_fields = ['order__order_number', 'product__name']
 
 class CustomerAddressInline(admin.TabularInline):
     model = CustomerAddress
@@ -40,7 +48,9 @@ class OrderAdmin(admin.ModelAdmin):
     actions = ['mark_preparing', 'mark_ready', 'mark_dispatched', 'mark_delivered', 'mark_cancelled']
 
     def _set_status(self, request, queryset, status_value):
-        queryset.update(status=status_value)
+        for order in queryset:
+            order.status = status_value
+            order.save(update_fields=['status'])
 
     @admin.action(description='Mark selected orders as Preparing')
     def mark_preparing(self, request, queryset): self._set_status(request, queryset, 'Preparing')
@@ -103,10 +113,12 @@ class ResendWebhookEventAdmin(admin.ModelAdmin):
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Category)
 admin.site.register(Order, OrderAdmin)
+admin.site.register(OrderItem, OrderItemAdmin)
 admin.site.register(CustomerProfile, CustomerProfileAdmin)
 admin.site.register(CustomerAddress, CustomerAddressAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(ProductOptionGroup, ProductOptionGroupAdmin)
+admin.site.register(ProductOption, ProductOptionAdmin)
 admin.site.register(DeliveryZone)
 admin.site.register(LoyaltyTransaction, LoyaltyTransactionAdmin)
 admin.site.register(ReferralRecord, ReferralRecordAdmin)

@@ -8,6 +8,7 @@ class Command(BaseCommand):
         self.stdout.write("Seeding Zaddys Menu...")
 
         if Category.objects.exists() or Product.objects.exists():
+            self.ensure_drinks()
             self.stdout.write(self.style.WARNING(
                 "Menu data already exists; nothing was changed."
             ))
@@ -83,4 +84,25 @@ class Command(BaseCommand):
         cat_box = Category.objects.create(name="Moment Box")
         Product.objects.create(name="The Moment Box (Custom Bundle)", category=cat_box, price=13750, description="Build your own custom box. Main + Side + Dessert + Drink + Extras with a 4% discount applied automatically!", is_custom_quote=False)
 
+        self.ensure_drinks()
+
         self.stdout.write(self.style.SUCCESS("Successfully seeded all Zaddys menu categories and items!"))
+
+    def ensure_drinks(self):
+        drinks_category, _ = Category.objects.get_or_create(name="Drinks")
+        drinks = [
+            ("Zaddy's Chapman", 1800, "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800"),
+            ("Fresh Fruit Juice", 2200, "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800"),
+            ("Creamy Milkshake", 2800, "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800"),
+            ("Sparkling Water", 1000, "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=800"),
+        ]
+        for name, price, image in drinks:
+            Product.objects.get_or_create(
+                name=name,
+                category=drinks_category,
+                defaults={
+                    'price': price,
+                    'description': 'Chilled and ready to complete your order.',
+                    'image': image,
+                },
+            )
