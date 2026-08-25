@@ -50,9 +50,10 @@ body {
 
 .dark body,
 .dark .app-content,
-.dark .app-frame {
-  background-color: var(--z-black) !important;
-  color: #f5f5f5;
+.dark .app-frame,
+.dark .brand-entry {
+  background-color: #ffffff !important;
+  color: var(--z-red) !important;
 }
 
 .dark .theme-toggle {

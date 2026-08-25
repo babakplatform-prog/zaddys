@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <CartProvider>
-          <div className="app-content">
+          <div className="app-content min-h-screen">
             <ThemeToggle />
             {children}
             <DockNav />

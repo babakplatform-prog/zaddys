@@ -29,7 +29,7 @@ export default function GetStartedPage() {
   }, []);
 
   return (
-    <main className="app-frame flex min-h-screen flex-col bg-white text-zaddys-ink">
+    <main className="brand-entry app-frame flex min-h-screen flex-col bg-white text-zaddys-red">
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-6 pb-8 pt-7">
         <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.18em] text-zaddys-gray">
           <Link href="/" className="transition hover:text-zaddys-red">ZADDYS</Link>
@@ -53,7 +53,7 @@ export default function GetStartedPage() {
             <div className="relative flex min-h-[290px] flex-col justify-between">
               <div className="flex items-start justify-between">
                 <div className="rounded-2xl bg-black p-2 shadow-lg">
-                  <Image src="/zaddys-logo.png" alt="ZADDYS logo" width={58} height={58} className="h-14 w-14 rounded-xl object-cover" priority />
+                  <Image src="/zaddys-logo.PNG" alt="ZADDYS logo" width={58} height={58} className="h-14 w-14 rounded-xl object-cover" priority />
                 </div>
                 <ArrowUpRight size={25} aria-hidden="true" />
               </div>

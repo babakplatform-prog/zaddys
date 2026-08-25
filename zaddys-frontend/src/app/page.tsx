@@ -134,7 +134,7 @@ export default function HomePage() {
       {/* Header Section */}
       <div className="relative z-10 border-b border-zinc-100 bg-white px-5 pb-6 pt-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
         <div className="mb-8 flex items-center justify-between">
-          <Image src="/zaddys-logo.png" alt="Zaddy's Creamery and Grills" width={150} height={70} className="h-12 w-auto object-contain" />
+          <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={150} height={70} className="h-12 w-auto object-contain" />
           <Link href="/cart" aria-label="Open cart" className="relative rounded-full bg-zaddys-surface p-2 text-zaddys-ink">
             <ShoppingBag size={19} />
           </Link>
@@ -144,10 +144,10 @@ export default function HomePage() {
         <p className="text-sm text-zinc-500 mt-1">What are you craving today?</p>
 
         {promoProduct && (
-          <Link href={`/product/${promoProduct.id}`} className="relative mt-6 block min-h-40 overflow-hidden rounded-2xl bg-zaddys-black p-5 text-white shadow-lg">
-            {promoProduct.image && <Image src={promoProduct.image} alt="Zaddys featured offer" fill unoptimized sizes="(max-width: 512px) 90vw, 440px" className="object-cover opacity-45" />}
+          <Link href={`/product/${promoProduct.id}`} className="relative mt-6 block min-h-40 overflow-hidden rounded-2xl border border-red-100 bg-zaddys-red p-5 text-white shadow-lg shadow-red-900/20">
+            {promoProduct.image && <Image src={promoProduct.image} alt="Zaddys featured offer" fill unoptimized sizes="(max-width: 512px) 90vw, 440px" className="object-cover opacity-25 mix-blend-multiply" />}
             <div className="relative z-10 max-w-[75%]">
-              <span className="mb-2 inline-flex rounded-full bg-zaddys-red px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]">{promoCopy.badge}</span>
+              <span className="mb-2 inline-flex rounded-full bg-zaddys-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]">{promoCopy.badge}</span>
               <h2 className="text-[20px] font-bold leading-6">{promoProduct.name}</h2>
               <p className="mt-1 text-[12px] text-white/80">{promoCopy.description}</p>
               <span className="mt-4 inline-flex items-center gap-1 text-[12px] font-semibold">Explore offer <ChevronRight size={15} /></span>

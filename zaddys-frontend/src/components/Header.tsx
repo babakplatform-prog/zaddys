@@ -13,7 +13,7 @@ export default function Header() {
         </button>
 
         {/* Center Brand */}
-        <Image src="/zaddys-logo.png" alt="Zaddy's Creamy and Grills" width={130} height={60} className="h-11 w-auto object-contain" />
+        <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamy and Grills" width={130} height={60} className="h-11 w-auto object-contain" />
 
         {/* Cart Icon with Notification Dot */}
         <button className="p-2 relative text-zaddys-white hover:text-zaddys-red transition-colors">

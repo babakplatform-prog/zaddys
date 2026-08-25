@@ -63,9 +63,8 @@ export default function CartPage() {
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
     const token = getAccessToken();
-    if (!token) return;
     Promise.all([
-      fetch(`${apiUrl}/profile/`, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.ok ? res.json() as Promise<Profile> : null),
+      token ? fetch(`${apiUrl}/profile/`, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.ok ? res.json() as Promise<Profile> : null) : Promise.resolve(null),
       fetch(`${apiUrl}/delivery-zones/`).then((res) => res.ok ? res.json() : Promise.reject(new Error("Delivery zones unavailable"))),
     ])
       .then(([profile, zones]) => {
@@ -74,9 +73,13 @@ export default function CartPage() {
           setEmail(profile.email);
           setPhone(profile.phone || "");
         }
-        setDeliveryZones(Array.isArray(zones) ? zones : zones.results || []);
+        const availableZones = Array.isArray(zones) ? zones : zones.results || [];
+        setDeliveryZones(availableZones.length ? availableZones : fallbackDeliveryZones);
       })
-      .catch(() => setZonesError("Delivery areas are unavailable. Please try again."))
+      .catch(() => {
+        setDeliveryZones(fallbackDeliveryZones);
+        setZonesError("Showing standard delivery areas while live areas reconnect.");
+      })
       .finally(() => {
         setProfileLoading(false);
         setZonesLoading(false);
@@ -326,3 +329,11 @@ export default function CartPage() {
 
 type PaystackReference = { reference: string };
 type Profile = { name: string; email: string; phone?: string };
+
+const fallbackDeliveryZones = [
+  { id: 1, name: "Ilorin GRA", fee: 1500 },
+  { id: 2, name: "Tanke", fee: 1500 },
+  { id: 3, name: "Fate", fee: 2000 },
+  { id: 4, name: "Adewole", fee: 1500 },
+  { id: 5, name: "University Road", fee: 2000 },
+];
