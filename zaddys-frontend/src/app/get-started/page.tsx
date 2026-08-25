@@ -7,15 +7,25 @@ import { useEffect, useState } from "react";
 
 type ShowcaseProduct = { id: number; name: string; image?: string | null };
 
+const fallbackShowcase: ShowcaseProduct[] = [
+  { id: 1, name: "Signature grill", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800" },
+  { id: 2, name: "Fresh drink", image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=800" },
+  { id: 3, name: "Creamy treat", image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800" },
+  { id: 4, name: "Comfort food", image: "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?w=800" },
+];
+
 export default function GetStartedPage() {
-  const [showcase, setShowcase] = useState<ShowcaseProduct[]>([]);
+  const [showcase, setShowcase] = useState<ShowcaseProduct[]>(fallbackShowcase);
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
     fetch(`${apiUrl}/products/`)
       .then((response) => response.json())
-      .then((data) => setShowcase((Array.isArray(data) ? data : data.results || []).filter((product: ShowcaseProduct) => product.image).slice(0, 4)))
-      .catch(() => setShowcase([]));
+      .then((data) => {
+        const liveProducts = (Array.isArray(data) ? data : data.results || []).filter((product: ShowcaseProduct) => product.image).slice(0, 4);
+        if (liveProducts.length >= 4) setShowcase(liveProducts);
+      })
+      .catch(() => undefined);
   }, []);
 
   return (
@@ -37,19 +47,19 @@ export default function GetStartedPage() {
             Fresh comfort food, thoughtful bundles, and little treats made for the people you love.
           </p>
 
-          <div className="relative mt-9 overflow-hidden rounded-[2rem] border border-zinc-700 bg-zaddys-red p-5 shadow-2xl shadow-black/40">
+          <div className="relative mt-9 overflow-hidden rounded-[2rem] border border-red-100 bg-zaddys-red p-5 shadow-2xl shadow-red-900/20">
             <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full border-[18px] border-white/10" />
-            <div className="absolute -bottom-24 -left-12 h-48 w-48 rounded-full border-[24px] border-black/10" />
-            <div className="relative flex min-h-[245px] flex-col justify-between">
+            <div className="absolute -bottom-24 -left-12 h-48 w-48 rounded-full border-[24px] border-zaddys-black/10" />
+            <div className="relative flex min-h-[290px] flex-col justify-between">
               <div className="flex items-start justify-between">
                 <div className="rounded-2xl bg-black p-2 shadow-lg">
                   <Image src="/zaddys-logo.jpg" alt="ZADDYS logo" width={58} height={58} className="h-14 w-14 rounded-xl object-cover" priority />
                 </div>
                 <ArrowUpRight size={25} aria-hidden="true" />
               </div>
-              {showcase.length > 0 && <div className="grid grid-cols-4 gap-2 py-4">
+              <div className="grid grid-cols-4 gap-2 py-4">
                 {showcase.map((product) => <div key={product.id} className="relative aspect-square overflow-hidden rounded-xl border-2 border-white/70 bg-white/20"><Image src={product.image || ""} alt={product.name} fill unoptimized sizes="100px" className="object-cover" /></div>)}
-              </div>}
+              </div>
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/75">Your next favourite</p>
                 <p className="mt-2 max-w-[230px] text-3xl font-black leading-none">Start with something delicious.</p>

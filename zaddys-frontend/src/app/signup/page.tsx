@@ -48,7 +48,7 @@ export default function SignupPage() {
         referralCode: formData.referralCode,
       });
       sessionStorage.setItem("zaddys_pending_email", data.email || formData.email);
-      router.push("/auth/verify");
+      window.location.assign("/auth/verify");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {
@@ -73,11 +73,12 @@ export default function SignupPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Full Name */}
         <div>
-          <label className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Full Name</label>
+          <label htmlFor="signup-name" className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Full Name</label>
           <div className="relative">
             <User className="absolute left-3 top-3.5 text-zinc-500" size={18} />
             <input
               type="text"
+              id="signup-name"
               name="username"
               required
               value={formData.username}
@@ -90,11 +91,12 @@ export default function SignupPage() {
 
         {/* Email Address */}
         <div>
-          <label className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Email Address</label>
+          <label htmlFor="signup-email" className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Email Address</label>
           <div className="relative">
             <Mail className="absolute left-3 top-3.5 text-zinc-500" size={18} />
             <input
               type="email"
+              id="signup-email"
               name="email"
               required
               value={formData.email}
@@ -107,11 +109,12 @@ export default function SignupPage() {
 
         {/* Phone Number */}
         <div>
-          <label className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Phone Number</label>
+          <label htmlFor="signup-phone" className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Phone Number</label>
           <div className="relative">
             <Phone className="absolute left-3 top-3.5 text-zinc-500" size={18} />
             <input
               type="tel"
+              id="signup-phone"
               name="phone"
               required
               value={formData.phone}
@@ -124,11 +127,12 @@ export default function SignupPage() {
 
         {/* Password Field with Eye Toggle */}
         <div>
-          <label className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Password</label>
+          <label htmlFor="signup-password" className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Password</label>
           <div className="relative">
             <Lock className="absolute left-3 top-3.5 text-zinc-500" size={18} />
             <input
               type={showPassword ? "text" : "password"}
+              id="signup-password"
               name="password"
               required
               value={formData.password}
@@ -148,11 +152,12 @@ export default function SignupPage() {
 
         {/* Confirm Password Field with Eye Toggle */}
         <div>
-          <label className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Confirm Password</label>
+          <label htmlFor="signup-confirm-password" className="block text-xs font-semibold uppercase text-zinc-400 mb-1">Confirm Password</label>
           <div className="relative">
             <Lock className="absolute left-3 top-3.5 text-zinc-500" size={18} />
             <input
               type={showConfirmPassword ? "text" : "password"}
+              id="signup-confirm-password"
               name="confirmPassword"
               required
               value={formData.confirmPassword}

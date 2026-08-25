@@ -5,6 +5,8 @@ from django.conf import settings
 resend.api_key = getattr(settings, 'RESEND_API_KEY', '')
 
 def send_welcome_email(user_email, user_name):
+    if settings.E2E_TEST_MODE:
+        return None
     try:
         r = resend.Emails.send({
             "from": f"Zaddys Creamery & Grills <{settings.DEFAULT_FROM_EMAIL}>",
@@ -23,6 +25,8 @@ def send_welcome_email(user_email, user_name):
         return None
 
 def send_order_confirmation_email(user_email, user_name, order_number, total):
+    if settings.E2E_TEST_MODE:
+        return None
     try:
         return resend.Emails.send({
             "from": f"Zaddys Creamery & Grills <{settings.DEFAULT_FROM_EMAIL}>",
@@ -44,6 +48,8 @@ def send_order_confirmation_email(user_email, user_name, order_number, total):
         return None
 
 def send_order_status_email(user_email, user_name, order_number, status):
+    if settings.E2E_TEST_MODE:
+        return None
     try:
         return resend.Emails.send({
             "from": f"Zaddys Creamery & Grills <{settings.DEFAULT_FROM_EMAIL}>",

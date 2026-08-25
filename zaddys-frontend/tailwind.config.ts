@@ -12,7 +12,7 @@ const config: Config = {
         zaddys: {
           red: "#C91414",
           black: "#121212",
-          ink: "#1A1A1A",
+          ink: "#C91414",
           gray: "#666666",
           white: "#FFFFFF",
           surface: "#F9F9F9",

@@ -5,7 +5,7 @@
 :root {
   --z-red: #c91414;
   --z-black: #121212;
-  --z-ink: #1a1a1a;
+  --z-ink: #c91414;
   --z-gray: #666666;
   --z-surface: #f9f9f9;
   --z-border: #eaeaea;
@@ -25,7 +25,7 @@ html.dark {
 
 body {
   background-color: #ffffff;
-  color: var(--z-ink);
+  color: var(--z-red);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -68,9 +68,17 @@ select {
   font: inherit;
 }
 
+.text-black {
+  color: var(--z-red) !important;
+}
+
+.hover\\:text-black:hover {
+  color: var(--z-red) !important;
+}
+
 @layer components {
   .app-frame {
-    @apply min-h-screen w-full bg-white text-zaddys-ink;
+    @apply min-h-screen w-full bg-white text-zaddys-red;
   }
 
   .app-content {
@@ -86,6 +94,6 @@ select {
   }
 
   .field {
-    @apply w-full rounded-xl border border-zaddys-border bg-white px-4 py-3 text-[13px] text-zaddys-ink outline-none transition focus:border-zaddys-red focus:ring-2 focus:ring-red-100;
+    @apply w-full rounded-xl border border-zaddys-border bg-white px-4 py-3 text-[13px] text-zaddys-red outline-none transition focus:border-zaddys-red focus:ring-2 focus:ring-red-100;
   }
 }

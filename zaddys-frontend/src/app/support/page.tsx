@@ -132,7 +132,7 @@ export default function SupportPage() {
 
         {/* Email Support */}
         <a href="mailto:Talk.to.zaddy@zaddys.ng" className="flex items-center space-x-4 bg-white p-4 rounded-3xl shadow-sm border border-zinc-100 hover:border-red-500 transition">
-          <div className="bg-zinc-100 p-3 rounded-2xl text-black"><Mail size={24} /></div>
+          <div className="bg-zinc-100 p-3 rounded-2xl text-zaddys-red"><Mail size={24} /></div>
           <div>
             <h2 className="font-bold text-sm">Email Us</h2>
             <p className="text-xs text-zinc-500">Talk.to.zaddy@zaddys.ng</p>

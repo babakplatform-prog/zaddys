@@ -20,6 +20,13 @@ NEXT_PUBLIC_GOOGLE_CLIENT_ID=replace_me
 APPLE_CLIENT_ID=replace_me
 ```
 
+OAuth callback URLs for this NextAuth app:
+
+- Local Google and Apple callback: `http://localhost:3000/api/auth/callback/google` or `http://localhost:3000/api/auth/callback/apple`
+- Production Google and Apple callback: `https://www.zaddys.ng/api/auth/callback/google` or `https://www.zaddys.ng/api/auth/callback/apple`
+
+Register both local and production URLs in each provider console. The client IDs and secrets are read server-side by the NextAuth route; the `NEXT_PUBLIC_*` Google client ID alias is supported for compatibility, but the server-only `GOOGLE_CLIENT_ID` is preferred.
+
 For production, set `NEXT_PUBLIC_API_URL` to the deployed Django API URL and `NEXTAUTH_URL` to the deployed frontend URL. `NEXT_PUBLIC_*` values are exposed to the browser. OAuth client secrets are server-side NextAuth secrets and must not be exposed through `NEXT_PUBLIC_*` names.
 
 ## Backend: `zaddys-backend/.env` and Django deployment
@@ -60,6 +67,8 @@ Enable Maps JavaScript API and Places API. Restrict the browser key by HTTP refe
 - `https://*.vercel.app/*`
 
 Restrict the key API list to the APIs required by the checkout address autocomplete.
+
+For address suggestions, enable **Maps JavaScript API** and **Places API**, attach billing to the Google Cloud project, and restrict the browser key by HTTP referrer. The checkout field uses the key in `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, limits suggestions to Nigeria (`country: ng`), and stores the selected place's formatted address in the order delivery address.
 
 ## Paystack setup
 

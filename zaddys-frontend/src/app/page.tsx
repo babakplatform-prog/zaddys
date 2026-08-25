@@ -167,7 +167,7 @@ export default function HomePage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search the menu..."
-              className="w-full bg-zinc-100 border-none rounded-2xl px-4 py-3.5 pl-12 text-black placeholder-zinc-400 focus:ring-2 focus:ring-red-600 transition"
+              className="w-full bg-zinc-100 border-none rounded-2xl px-4 py-3.5 pl-12 text-zaddys-red placeholder-zinc-400 focus:ring-2 focus:ring-red-600 transition"
             />
           </div>
           <button type="button" aria-label="Filter menu" className="flex-shrink-0 rounded-2xl bg-zaddys-red p-3.5 text-white shadow-lg shadow-red-900/20 transition hover:bg-red-700">
@@ -179,7 +179,7 @@ export default function HomePage() {
       {/* Menu Section */}
       <div className="px-6 mt-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-black tracking-tight text-black uppercase">Our Menu</h2>
+          <h2 className="text-lg font-black tracking-tight text-zaddys-red uppercase">Our Menu</h2>
         </div>
 
         <div id="menu" className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">

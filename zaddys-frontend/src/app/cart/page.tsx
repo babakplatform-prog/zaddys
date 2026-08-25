@@ -177,7 +177,7 @@ export default function CartPage() {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6">
-        <h2 className="text-2xl font-black text-black mb-2">Your Cart is Empty</h2>
+        <h2 className="text-2xl font-black text-zaddys-red mb-2">Your Cart is Empty</h2>
         <p className="text-zinc-500 mb-6">Looks like you haven&apos;t added any moments yet.</p>
         <Link href="/" className="bg-red-600 text-white font-bold py-3 px-8 rounded-full shadow-lg">
           Explore Menu
@@ -189,14 +189,14 @@ export default function CartPage() {
   return (
     <main className="app-frame pb-32">
       <div className="sticky top-0 z-40 flex items-center gap-4 border-b border-zaddys-border bg-white p-4">
-        <button onClick={() => router.back()} className="p-2 bg-zinc-100 rounded-full text-black">
+        <button onClick={() => router.back()} className="p-2 bg-zinc-100 rounded-full text-zaddys-red">
           <ArrowLeft size={20} />
         </button>
         <h1 className="page-title text-zaddys-ink">Checkout</h1>
       </div>
 
       <div className="p-4 max-w-md mx-auto">
-        <h2 className="font-bold text-black mb-3 text-sm uppercase tracking-wider">Order Summary</h2>
+        <h2 className="font-bold text-zaddys-red mb-3 text-sm uppercase tracking-wider">Order Summary</h2>
         <div className="overflow-hidden rounded-3xl border border-zaddys-border bg-white shadow-sm mb-6">
           {cart.map((item) => (
             <div key={item.id} className="flex items-center justify-between gap-3 border-b border-zaddys-border p-4 last:border-b-0">
@@ -214,11 +214,11 @@ export default function CartPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm leading-5 text-black">{item.name}</h3>
+                  <h3 className="font-bold text-sm leading-5 text-zaddys-red">{item.name}</h3>
                   <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-black transition-transform active:scale-90"><Minus size={12} /></button>
+                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-zaddys-red transition-transform active:scale-90"><Minus size={12} /></button>
                     <span>{item.quantity}</span>
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-black transition-transform active:scale-90"><Plus size={12} /></button>
+                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-zaddys-red transition-transform active:scale-90"><Plus size={12} /></button>
                   </div>
                   <p className="text-sm font-black text-red-600">₦{(item.price * item.quantity).toLocaleString()}</p>
                 </div>
@@ -230,7 +230,7 @@ export default function CartPage() {
           ))}
         </div>
 
-        <h2 className="font-bold text-black mb-3 text-sm uppercase tracking-wider">Delivery Info</h2>
+        <h2 className="font-bold text-zaddys-red mb-3 text-sm uppercase tracking-wider">Delivery Info</h2>
         <form id="checkout-form" onSubmit={handleCheckout} className="space-y-3 mb-6">
           <div className="rounded-xl border border-zaddys-border bg-zaddys-surface px-4 py-3 text-[13px] text-zaddys-ink">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-zaddys-gray">Ordering as</p>
@@ -240,43 +240,45 @@ export default function CartPage() {
           <input 
             type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
             placeholder="Phone Number" 
-            className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
+            className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
           />
           <div className="relative">
             <MapPin className="absolute left-3 top-3.5 text-zinc-400" size={18} />
             {mapsApiKey ? (
               <GoogleAutocomplete
+                id="delivery-address"
                 apiKey={mapsApiKey}
                 options={{ types: ["address"], componentRestrictions: { country: "ng" } }}
                 onPlaceSelected={(place) => setDeliveryAddress(place.formatted_address || "")}
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
                 placeholder="Full Delivery Address"
-                className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 pl-10 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
+                className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 pl-10 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
               />
             ) : (
               <input
+                id="delivery-address"
                 required
                 type="text"
                 value={deliveryAddress}
                 onChange={(e) => setDeliveryAddress(e.target.value)}
                 placeholder="Full Delivery Address"
-                className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 pl-10 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
+                className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 pl-10 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
               />
             )}
           </div>
-          <input type="text" required value={landmark} onChange={(e) => setLandmark(e.target.value)} placeholder="Nearest Landmark" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
-          <select required value={deliveryZoneId} onChange={(e) => setDeliveryZoneId(e.target.value)} className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black focus:outline-none focus:border-red-600 shadow-sm">
+          <input type="text" required value={landmark} onChange={(e) => setLandmark(e.target.value)} placeholder="Nearest Landmark" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
+          <select required value={deliveryZoneId} onChange={(e) => setDeliveryZoneId(e.target.value)} className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red focus:outline-none focus:border-red-600 shadow-sm">
             <option value="">{zonesLoading ? "Loading delivery areas..." : "Select delivery area"}</option>
             {deliveryZones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name} - ₦{Number(zone.fee).toLocaleString()}</option>)}
           </select>
           {zonesError && <p className="text-xs font-semibold text-zaddys-red">{zonesError}</p>}
           <div className="flex gap-2">
-            <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="Coupon code" className="min-w-0 flex-1 bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
+            <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="Coupon code" className="min-w-0 flex-1 bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
             <button type="button" onClick={applyCoupon} className="rounded-2xl bg-zinc-900 px-4 py-3 text-sm font-bold text-white">Apply</button>
           </div>
           {couponMessage && <p className="text-xs font-semibold text-red-600">{couponMessage}</p>}
-          <textarea value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} placeholder="Delivery Notes (Optional)" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" rows={3} />
+          <textarea value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} placeholder="Delivery Notes (Optional)" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" rows={3} />
         </form>
 
         <div className="rounded-3xl bg-zaddys-black p-5 text-white shadow-lg shadow-black/15 mb-4">

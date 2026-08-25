@@ -20,7 +20,7 @@ export default function OrderSuccess() {
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
       <h1 className="mb-2 text-center text-[20px] font-semibold tracking-tight">Order Confirmed!</h1>
       <p className="mb-8 max-w-[80%] text-center text-[13px] text-zaddys-gray">
-        Your order <span className="font-bold text-black">#{orderNumber}</span> has been received and is currently being prepared by our kitchen.
+        Your order <span className="font-bold text-zaddys-red">#{orderNumber}</span> has been received and is currently being prepared by our kitchen.
       </p>
 
       {/* Estimated Time Card */}
@@ -30,7 +30,7 @@ export default function OrderSuccess() {
         </div>
         <div>
           <p className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Estimated Delivery</p>
-          <p className="text-lg font-black text-black">35 - 45 Mins</p>
+          <p className="text-lg font-black text-zaddys-red">35 - 45 Mins</p>
         </div>
       </div>
 
@@ -40,7 +40,7 @@ export default function OrderSuccess() {
           <span className="flex w-full items-center justify-center gap-2 rounded-xl bg-zaddys-black py-4 font-semibold text-white transition hover:bg-zinc-800"><span>Track Order Status</span><ChevronRight size={18} /></span>
         </Link>
         <Link href="/">
-          <span className="block w-full rounded-xl bg-zinc-100 py-4 text-center font-semibold text-black transition hover:bg-zinc-200">Back to Menu</span>
+          <span className="block w-full rounded-xl bg-zinc-100 py-4 text-center font-semibold text-zaddys-red transition hover:bg-zinc-200">Back to Menu</span>
         </Link>
       </div>
       </div>

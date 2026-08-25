@@ -13,7 +13,7 @@ export default function AuthPage() {
 
   return (
     <main className="min-h-screen bg-zaddys-white text-zaddys-black font-sans px-4 py-6 flex flex-col relative">
-      <Link href="/" className="absolute top-6 left-4 text-zinc-500 hover:text-black transition">
+      <Link href="/" className="absolute top-6 left-4 text-zinc-500 hover:text-zaddys-red transition">
         <ArrowLeft size={24} />
       </Link>
 
@@ -38,7 +38,7 @@ export default function AuthPage() {
           <span className="text-xs text-zinc-500 uppercase font-bold mb-4">Or continue with</span>
           
           <div className="grid grid-cols-2 gap-3 w-full">
-            <button onClick={() => handleSocialAuth('google')} className="bg-zinc-100 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-200 transition">
+            <button onClick={() => handleSocialAuth('google')} className="bg-zinc-100 text-zaddys-red font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-200 transition">
               <Globe2 size={17} /><span>Google</span>
             </button>
             <button onClick={() => handleSocialAuth('apple')} className="bg-black text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-800 transition">

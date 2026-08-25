@@ -15,6 +15,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 resend.api_key = getattr(settings, 'RESEND_API_KEY', '')
 
 def send_otp_email(user_email, otp_code, user_name='there'):
+    if settings.E2E_TEST_MODE:
+        return
     try:
         resend.Emails.send({
                 "from": f"Zaddys Creamery & Grills <{settings.DEFAULT_FROM_EMAIL}>",
@@ -55,7 +57,10 @@ class RegisterView(views.APIView):
         if User.objects.filter(email=email).exists():
             return Response({"error": "Account exists."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.create_user(username=username or email, email=email, password=password)
+        login_username = username or email
+        if User.objects.filter(username=login_username).exists():
+            login_username = f'{login_username}-{random.randint(1000, 9999)}'
+        user = User.objects.create_user(username=login_username, email=email, password=password)
         profile = CustomerProfile.objects.create(user=user, phone=phone, is_verified=False)
 
         issue_otp(profile)

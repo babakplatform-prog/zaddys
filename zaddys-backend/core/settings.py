@@ -153,6 +153,7 @@ PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', PAYSTACK_TEST_SECRET
 PAYSTACK_WEBHOOK_SECRET = os.environ.get('PAYSTACK_WEBHOOK_SECRET', PAYSTACK_SECRET_KEY)
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'orders@zaddys.ng')
 APP_URL = os.environ.get('NEXT_PUBLIC_APP_URL', os.environ.get('APP_URL', 'http://localhost:3000'))
+E2E_TEST_MODE = os.environ.get('E2E_TEST_MODE', 'False').lower() == 'true' or os.environ.get('E2E_TEST_MODE') == '1'
 RESEND_WEBHOOK_SECRET = os.environ.get('RESEND_WEBHOOK_SECRET', '')
 
 SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'

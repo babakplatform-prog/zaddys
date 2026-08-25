@@ -101,27 +101,27 @@ export default function ProfileDashboard() {
             </div>
             <div>
               <p className="text-xs text-zinc-500 font-bold uppercase">Refer & Earn</p>
-              <p className="text-black font-black">{userData?.referral_code || "ZADDYS-VIP"}</p>
+              <p className="text-zaddys-red font-black">{userData?.referral_code || "ZADDYS-VIP"}</p>
             </div>
           </div>
-          <button onClick={copyReferral} className="p-3 bg-zinc-100 rounded-xl text-black hover:bg-zinc-200 transition">
+          <button onClick={copyReferral} className="p-3 bg-zinc-100 rounded-xl text-zaddys-red hover:bg-zinc-200 transition">
             <Copy size={18} />
           </button>
         </div>
 
         {/* Order History */}
         <div>
-          <h2 className="text-lg font-black text-black mb-3">Recent Orders</h2>
+          <h2 className="text-lg font-black text-zaddys-red mb-3">Recent Orders</h2>
           {userData?.orders && userData.orders.length > 0 ? (
             <div className="space-y-3">
               {userData.orders.map((order, idx) => (
                 <div key={idx} className="bg-white p-4 rounded-3xl shadow-sm border border-zinc-100 flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="bg-zinc-100 p-3 rounded-2xl text-black">
+                    <div className="bg-zinc-100 p-3 rounded-2xl text-zaddys-red">
                       <Package size={20} />
                     </div>
                     <Link href={`/track/${order.order_number || order.id}`} className="block">
-                      <p className="font-bold text-sm text-black">Order #{order.order_number || order.id}</p>
+                      <p className="font-bold text-sm text-zaddys-red">Order #{order.order_number || order.id}</p>
                       <p className="text-xs font-semibold text-zinc-500 mt-0.5">
                         <span className={order.status === "Pending" ? "text-orange-500" : "text-green-500"}>
                           {order.status}
@@ -143,7 +143,7 @@ export default function ProfileDashboard() {
         </div>
 
         {/* Logout Button */}
-        <button onClick={signOut} className="w-full bg-zinc-200 hover:bg-zinc-300 text-black font-bold py-4 rounded-2xl transition flex items-center justify-center space-x-2 mt-8">
+        <button onClick={signOut} className="w-full bg-zinc-200 hover:bg-zinc-300 text-zaddys-red font-bold py-4 rounded-2xl transition flex items-center justify-center space-x-2 mt-8">
           <LogOut size={18} />
           <span>Sign Out</span>
         </button>
