@@ -15,6 +15,8 @@ declare global {
   }
 }
 
+let paystackScriptPromise: Promise<void> | null = null;
+
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
   const router = useRouter();
@@ -120,35 +122,47 @@ export default function CartPage() {
     }
   };
 
-  const initializePayment = () => {
-    const open = () => {
+  const initializePayment = async () => {
+    const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+    if (!publicKey || !publicKey.startsWith("pk_test_")) {
+      setIsProcessing(false);
+      alert("Paystack test mode is not configured. Please contact support.");
+      return;
+    }
+
+    try {
       if (!window.PaystackPop) {
-        setIsProcessing(false);
-        alert("Payment is unavailable right now. Please try again.");
-        return;
+        paystackScriptPromise ??= new Promise<void>((resolve, reject) => {
+          const existingScript = document.querySelector<HTMLScriptElement>('script[data-paystack="inline"]');
+          if (existingScript) {
+            existingScript.addEventListener("load", () => resolve(), { once: true });
+            existingScript.addEventListener("error", () => reject(new Error("Paystack failed to load")), { once: true });
+            return;
+          }
+          const script = document.createElement("script");
+          script.src = "https://js.paystack.co/v1/inline.js";
+          script.dataset.paystack = "inline";
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Paystack failed to load"));
+          document.body.appendChild(script);
+        });
+        await paystackScriptPromise;
       }
+      if (!window.PaystackPop) throw new Error("Paystack SDK unavailable");
       window.PaystackPop.setup({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_your_key_here",
+        key: publicKey,
         email,
-        amount: payableTotal * 100,
-        ref: new Date().getTime().toString(),
+        amount: Math.round(payableTotal * 100),
+        ref: `ZD-${Date.now()}`,
         callback: onSuccess,
         onClose,
       }).openIframe();
-    };
-
-    if (window.PaystackPop) {
-      open();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.onload = open;
-    script.onerror = () => {
+    } catch (error) {
+      paystackScriptPromise = null;
       setIsProcessing(false);
+      console.error("Paystack initialization error:", error);
       alert("Payment is unavailable right now. Please try again.");
-    };
-    document.body.appendChild(script);
+    }
   };
 
   const onClose = () => {
@@ -171,7 +185,7 @@ export default function CartPage() {
     
     setIsProcessing(true);
     // Fire Paystack Popup
-    initializePayment();
+    void initializePayment();
   };
 
   if (cart.length === 0) {
