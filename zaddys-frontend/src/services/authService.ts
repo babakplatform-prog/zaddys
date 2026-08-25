@@ -29,3 +29,7 @@ export function getAccessToken() {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("zaddys_access_token");
 }
+
+export function getApiUrl() {
+  return process.env.NEXT_PUBLIC_API_URL || "https://zaddys.onrender.com/api";
+}

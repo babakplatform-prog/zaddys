@@ -1,4 +1,6 @@
 import random
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework import status, views
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -80,7 +82,9 @@ class LoginView(views.APIView):
             # Generate 6-digit OTP
             otp = str(random.randint(100000, 999999))
             profile.otp_code = otp
-            profile.save()
+            profile.otp_expires_at = timezone.now() + timedelta(minutes=10)
+            profile.otp_attempts = 0
+            profile.save(update_fields=['otp_code', 'otp_expires_at', 'otp_attempts'])
             
             # Send OTP via Resend
             send_otp_email(user.email, otp)
@@ -97,10 +101,16 @@ class VerifyOTPView(views.APIView):
             user = User.objects.get(email=email)
             profile = CustomerProfile.objects.get(user=user)
             
+            if profile.otp_attempts >= 5:
+                return Response({"error": "Too many attempts. Request a new code."}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            if not profile.otp_expires_at or profile.otp_expires_at <= timezone.now():
+                return Response({"error": "This code has expired. Request a new code."}, status=status.HTTP_400_BAD_REQUEST)
             if profile.otp_code == otp:
                 profile.is_verified = True
                 profile.otp_code = "" # Clear it after use
-                profile.save()
+                profile.otp_expires_at = None
+                profile.otp_attempts = 0
+                profile.save(update_fields=['is_verified', 'otp_code', 'otp_expires_at', 'otp_attempts'])
                 refresh = RefreshToken.for_user(user)
                 return Response({
                     "message": "Verification successful",
@@ -113,6 +123,8 @@ class VerifyOTPView(views.APIView):
                     },
                 }, status=status.HTTP_200_OK)
             else:
+                profile.otp_attempts += 1
+                profile.save(update_fields=['otp_attempts'])
                 return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)

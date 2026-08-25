@@ -51,6 +51,8 @@ class CustomerProfile(models.Model):
     referral_code = models.CharField(max_length=50, blank=True, null=True)
     points = models.IntegerField(default=0)
     otp_code = models.CharField(max_length=6, blank=True, null=True)
+    otp_expires_at = models.DateTimeField(blank=True, null=True)
+    otp_attempts = models.PositiveSmallIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
