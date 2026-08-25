@@ -74,7 +74,7 @@ export default function LoginPage() {
   return (
     <div className="app-frame flex min-h-screen flex-col justify-center px-5 py-12 pb-36 font-sans">
       <div className="mb-8 text-center">
-        <Image src="/zaddys-logo.PNG" alt="Zaddys" width={72} height={72} className="mx-auto mb-2 h-12 w-12 rounded-full object-cover" priority />
+        <Image src="/zaddys-logo.png" alt="Zaddys" width={72} height={72} className="mx-auto mb-2 h-12 w-12 rounded-full object-cover" priority />
         <h1 className="text-[24px] font-bold tracking-[0.08em] text-zaddys-ink">ZADDYS</h1>
         <p className="mt-1 text-[13px] text-zaddys-gray">
           {step === 1 ? "Welcome back. Log in to continue." : "Enter the verification code sent to your email."}

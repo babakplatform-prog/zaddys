@@ -27,7 +27,7 @@ export default function CartPage() {
   const [email, setEmail] = useState(""); // Needed for Paystack receipt
   const [landmark, setLandmark] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
-  const [deliveryZones, setDeliveryZones] = useState<{ id: number; name: string; fee: number }[]>([]);
+  const [deliveryZones, setDeliveryZones] = useState<{ id: number; name: string; fee: number }[]>(fallbackDeliveryZones);
   const [deliveryZoneId, setDeliveryZoneId] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -73,7 +73,7 @@ export default function CartPage() {
           setEmail(profile.email);
           setPhone(profile.phone || "");
         }
-        const availableZones = Array.isArray(zones) ? zones : zones.results || [];
+        const availableZones = Array.isArray(zones) ? zones : zones.results || zones.data || zones.zones || [];
         setDeliveryZones(availableZones.length ? availableZones : fallbackDeliveryZones);
       })
       .catch(() => {

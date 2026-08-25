@@ -134,7 +134,7 @@ export default function HomePage() {
       {/* Header Section */}
       <div className="relative z-10 border-b border-zinc-100 bg-white px-5 pb-6 pt-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
         <div className="mb-8 flex items-center justify-between">
-          <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={150} height={70} className="h-12 w-auto object-contain" />
+          <Image src="/zaddys-logo.png" alt="Zaddy's Creamery and Grills" width={150} height={70} className="h-12 w-auto object-contain" />
           <Link href="/cart" aria-label="Open cart" className="relative rounded-full bg-zaddys-surface p-2 text-zaddys-ink">
             <ShoppingBag size={19} />
           </Link>
@@ -144,16 +144,16 @@ export default function HomePage() {
         <p className="text-sm text-zinc-500 mt-1">What are you craving today?</p>
 
         {promoProduct && (
-          <Link href={`/product/${promoProduct.id}`} className="relative mt-6 block min-h-40 overflow-hidden rounded-2xl border border-red-100 bg-zaddys-red p-5 text-white shadow-lg shadow-red-900/20">
-            {promoProduct.image && <Image src={promoProduct.image} alt="Zaddys featured offer" fill unoptimized sizes="(max-width: 512px) 90vw, 440px" className="object-cover opacity-25 mix-blend-multiply" />}
+          <Link href={`/product/${promoProduct.id}`} className="relative mt-6 block min-h-40 overflow-hidden rounded-2xl border-2 border-zaddys-red bg-white p-5 text-zaddys-black shadow-lg shadow-red-900/10">
+            {promoProduct.image && <Image src={promoProduct.image} alt="Zaddys featured offer" fill unoptimized sizes="(max-width: 512px) 90vw, 440px" className="object-cover opacity-15 mix-blend-multiply" />}
             <div className="relative z-10 max-w-[75%]">
-              <span className="mb-2 inline-flex rounded-full bg-zaddys-black px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em]">{promoCopy.badge}</span>
+              <span className="mb-2 inline-flex rounded-full bg-zaddys-red px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">{promoCopy.badge}</span>
               <h2 className="text-[20px] font-bold leading-6">{promoProduct.name}</h2>
-              <p className="mt-1 text-[12px] text-white/80">{promoCopy.description}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-[12px] font-semibold">Explore offer <ChevronRight size={15} /></span>
+              <p className="mt-1 text-[12px] text-zaddys-gray">{promoCopy.description}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-[12px] font-semibold text-zaddys-red">Explore offer <ChevronRight size={15} /></span>
             </div>
             <div className="absolute bottom-4 right-4 flex gap-1.5">
-              {promoProducts.map((item, index) => <span key={item.id} className={`h-1.5 rounded-full transition-all ${index === promoIndex % promoProducts.length ? "w-5 bg-white" : "w-1.5 bg-white/50"}`} />)}
+              {promoProducts.map((item, index) => <span key={item.id} className={`h-1.5 rounded-full transition-all ${index === promoIndex % promoProducts.length ? "w-5 bg-zaddys-red" : "w-1.5 bg-zaddys-black/25"}`} />)}
             </div>
           </Link>
         )}
@@ -179,7 +179,8 @@ export default function HomePage() {
       {/* Menu Section */}
       <div className="px-6 mt-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-black tracking-tight text-zaddys-red uppercase">Our Menu</h2>
+          <h2 className="text-lg font-black tracking-tight text-zaddys-black uppercase">Our Menu</h2>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-zaddys-red">Fresh today</span>
         </div>
 
         <div id="menu" className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -206,8 +207,8 @@ export default function HomePage() {
           <div className="grid grid-cols-2 gap-4">
             {visibleProducts.map((product, index) => (
               <React.Fragment key={product.id}>
-              <Link href={`/product/${product.id}`} className="group flex min-w-0 flex-col rounded-xl border border-zaddys-border bg-zaddys-surface p-3 transition hover:border-zaddys-red">
-                <div className="relative mb-3 aspect-square w-full overflow-hidden rounded-xl bg-white">
+              <Link href={`/product/${product.id}`} className="group flex min-w-0 flex-col rounded-2xl border border-zaddys-border bg-white p-3 shadow-sm transition hover:border-zaddys-red hover:shadow-md">
+                <div className="relative mb-3 aspect-[1.08] w-full overflow-hidden rounded-xl bg-zaddys-surface">
                   {product.image ? (
                     <Image
                       src={product.image}
@@ -225,9 +226,12 @@ export default function HomePage() {
                 </div>
                 <span className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-zaddys-gray">{product.category_name}</span>
                 <h3 className="mb-2 line-clamp-2 text-[15px] font-semibold leading-5 text-zaddys-ink">{product.name}</h3>
-                <p className="mt-auto text-[14px] font-bold text-zaddys-red">
+                <div className="mt-auto flex items-end justify-between gap-2">
+                <p className="text-[14px] font-bold text-zaddys-red">
                   {product.is_custom_quote ? "Custom Quote" : `₦${Number(product.price).toLocaleString()}`}
                 </p>
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zaddys-black text-sm font-bold text-white transition group-hover:bg-zaddys-red">+</span>
+                </div>
               </Link>
               {index === 3 && <div ref={secondRowMarker} className="pointer-events-none col-span-2 h-px" aria-hidden="true" />}
               </React.Fragment>
