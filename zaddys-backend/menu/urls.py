@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import ProductViewSet, DeliveryZoneViewSet, ValidateCouponView, SupportConversationView
-from .views_auth import RegisterView, LoginView, VerifyOTPView
+from .views_auth import RegisterView, LoginView, VerifyOTPView, ResendOTPView
 from .views_order import CreateOrderView, OrderTrackingView
 from .views_profile import UserProfileView
 from .views_webhook import PaystackWebhookView, ResendWebhookView
@@ -17,6 +17,7 @@ urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='register-api'),
     path('auth/login/', LoginView.as_view(), name='login-api'),
     path('auth/verify-otp/', VerifyOTPView.as_view(), name='verify-otp-api'),
+    path('auth/resend-otp/', ResendOTPView.as_view(), name='resend-otp-api'),
     
     # Orders & Profile Endpoints
     path('orders/create/', CreateOrderView.as_view(), name='create-order'),

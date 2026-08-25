@@ -1,5 +1,6 @@
 import React from "react";
 import { ShoppingCart, Menu } from "lucide-react";
+import Image from "next/image";
 
 export default function Header() {
   return (
@@ -12,11 +13,7 @@ export default function Header() {
         </button>
 
         {/* Center Brand */}
-        <div className="flex flex-col items-center">
-          <h1 className="text-xl font-black text-zaddys-white tracking-widest" style={{ fontFamily: 'serif' }}>
-            ZADDYS
-          </h1>
-        </div>
+        <Image src="/zaddys-logo.jpg" alt="Zaddy's Creamy and Grills" width={130} height={60} className="h-11 w-auto object-contain" />
 
         {/* Cart Icon with Notification Dot */}
         <button className="p-2 relative text-zaddys-white hover:text-zaddys-red transition-colors">

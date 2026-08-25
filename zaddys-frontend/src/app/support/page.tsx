@@ -101,7 +101,7 @@ export default function SupportPage() {
           </section>
         )}
 
-        {!chatOpen && <button type="button" onClick={() => setChatOpen(true)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-zaddys-black py-4 text-[13px] font-semibold text-white"><MessageCircle size={18} /> Chat with a ZADDY agent</button>}
+        {!chatOpen && <button type="button" onClick={() => setChatOpen(true)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-zaddys-black py-4 text-[13px] font-semibold text-white"><MessageCircle size={18} /> Chat with Zaddy&apos;s agent</button>}
 
         {/* General Inquiry */}
         <a href={`https://wa.me/${whatsappNumber}?text=Hello Zaddys, I have a general inquiry.`} target="_blank" rel="noreferrer" className="flex items-center space-x-4 bg-white p-4 rounded-3xl shadow-sm border border-zinc-100 hover:border-red-500 transition">
@@ -131,11 +131,11 @@ export default function SupportPage() {
         </a>
 
         {/* Email Support */}
-        <a href="mailto:support@zaddys.ng" className="flex items-center space-x-4 bg-white p-4 rounded-3xl shadow-sm border border-zinc-100 hover:border-red-500 transition">
+        <a href="mailto:Talk.to.zaddy@zaddys.ng" className="flex items-center space-x-4 bg-white p-4 rounded-3xl shadow-sm border border-zinc-100 hover:border-red-500 transition">
           <div className="bg-zinc-100 p-3 rounded-2xl text-black"><Mail size={24} /></div>
           <div>
             <h2 className="font-bold text-sm">Email Us</h2>
-            <p className="text-xs text-zinc-500">support@zaddys.ng</p>
+            <p className="text-xs text-zinc-500">Talk.to.zaddy@zaddys.ng</p>
           </div>
         </a>
       </div>

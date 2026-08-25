@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowUp, ChevronRight, Download, Search, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 import { getAccessToken } from "@/services/authService";
+import ZaddysLoader from "@/components/ZaddysLoader";
 
 type Product = {
   id: number;
@@ -117,18 +118,10 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, [visibleProducts.length]);
 
-  // ==========================================
-  // SPLASH SCREEN (White background, spinning logo)
-  // ==========================================
   if (showSplash) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white text-zaddys-red">
-        <div className="flex h-36 w-36 animate-[spin_2s_linear_infinite] items-center justify-center rounded-full border-4 border-zaddys-red bg-white shadow-lg shadow-red-900/10">
-          <span className="text-2xl font-black tracking-[0.08em]" aria-label="ZADDYS">ZADDYS</span>
-        </div>
-        <p className="absolute bottom-12 text-xs font-semibold uppercase tracking-[0.3em] text-zaddys-red animate-pulse">
-          Made for moments.
-        </p>
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white">
+        <ZaddysLoader label="Made for moments" />
       </div>
     );
   }
@@ -141,10 +134,7 @@ export default function HomePage() {
       {/* Header Section */}
       <div className="relative z-10 border-b border-zinc-100 bg-white px-5 pb-6 pt-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
         <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Image src="/zaddys-logo.jpg" alt="ZADDYS logo" width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
-            <span className="text-[16px] font-black tracking-[0.08em] text-zaddys-ink">ZADDYS</span>
-          </div>
+          <Image src="/zaddys-logo.jpg" alt="Zaddy's Creamery and Grills" width={150} height={70} className="h-12 w-auto object-contain" />
           <Link href="/cart" aria-label="Open cart" className="relative rounded-full bg-zaddys-surface p-2 text-zaddys-ink">
             <ShoppingBag size={19} />
           </Link>
@@ -201,9 +191,7 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-4 border-zinc-200 border-t-red-600 rounded-full animate-spin"></div>
-          </div>
+          <ZaddysLoader label="Loading the menu" />
         ) : (
           menuError ? (
             <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-center">

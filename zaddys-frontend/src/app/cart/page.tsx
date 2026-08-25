@@ -24,9 +24,7 @@ export default function CartPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState(""); // Needed for Paystack receipt
   const [landmark, setLandmark] = useState("");
-  const [city, setCity] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
-  const [preferredDeliveryTime, setPreferredDeliveryTime] = useState("");
   const [deliveryZones, setDeliveryZones] = useState<{ id: number; name: string; fee: number }[]>([]);
   const [deliveryZoneId, setDeliveryZoneId] = useState("");
   const [couponCode, setCouponCode] = useState("");
@@ -102,9 +100,7 @@ export default function CartPage() {
           email,
           phone: phone,
           landmark,
-          city,
           delivery_notes: deliveryNotes,
-          preferred_delivery_time: preferredDeliveryTime,
           delivery_zone_id: deliveryZoneId,
           coupon_code: couponCode,
           transaction_ref: reference.reference
@@ -115,7 +111,7 @@ export default function CartPage() {
       const data = await res.json();
       clearCart();
       alert("Payment Successful! Your Zaddys order is being prepared.");
-      router.push(`/success?order=${data.order_number}`);
+      router.push(`/track/${data.order_number}`);
     } catch (error) {
       console.error("Order Save Error:", error);
       alert("Payment was successful, but we had a hiccup saving your order. Please contact support.");
@@ -169,7 +165,7 @@ export default function CartPage() {
       return;
     }
     if (profileLoading || zonesLoading) return alert("Loading your checkout details. Please wait a moment.");
-    if (!customerName || !email || !phone || !deliveryAddress || !landmark || !city || !preferredDeliveryTime || !deliveryZoneId || deliveryZones.length === 0) {
+    if (!customerName || !email || !phone || !deliveryAddress || !landmark || !deliveryZoneId || deliveryZones.length === 0) {
       return alert("Please fill all required delivery details.");
     }
     
@@ -220,9 +216,9 @@ export default function CartPage() {
                 <div>
                   <h3 className="font-bold text-sm leading-5 text-black">{item.name}</h3>
                   <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-black"><Minus size={12} /></button>
+                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-black transition-transform active:scale-90"><Minus size={12} /></button>
                     <span>{item.quantity}</span>
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-black"><Plus size={12} /></button>
+                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-black transition-transform active:scale-90"><Plus size={12} /></button>
                   </div>
                   <p className="text-sm font-black text-red-600">₦{(item.price * item.quantity).toLocaleString()}</p>
                 </div>
@@ -270,7 +266,6 @@ export default function CartPage() {
             )}
           </div>
           <input type="text" required value={landmark} onChange={(e) => setLandmark(e.target.value)} placeholder="Nearest Landmark" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
-          <input type="text" required value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
           <select required value={deliveryZoneId} onChange={(e) => setDeliveryZoneId(e.target.value)} className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black focus:outline-none focus:border-red-600 shadow-sm">
             <option value="">{zonesLoading ? "Loading delivery areas..." : "Select delivery area"}</option>
             {deliveryZones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name} - ₦{Number(zone.fee).toLocaleString()}</option>)}
@@ -281,7 +276,6 @@ export default function CartPage() {
             <button type="button" onClick={applyCoupon} className="rounded-2xl bg-zinc-900 px-4 py-3 text-sm font-bold text-white">Apply</button>
           </div>
           {couponMessage && <p className="text-xs font-semibold text-red-600">{couponMessage}</p>}
-          <input type="text" required value={preferredDeliveryTime} onChange={(e) => setPreferredDeliveryTime(e.target.value)} placeholder="Preferred Delivery Time" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
           <textarea value={deliveryNotes} onChange={(e) => setDeliveryNotes(e.target.value)} placeholder="Delivery Notes (Optional)" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-black placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" rows={3} />
         </form>
 

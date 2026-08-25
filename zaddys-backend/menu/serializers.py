@@ -4,7 +4,7 @@ from .models import Product, ProductOptionGroup, ProductOption, DeliveryZone
 class ProductOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductOption
-        fields = ['id', 'name', 'price_extra']
+        fields = ['id', 'name', 'price_extra', 'image']
 
 class ProductOptionGroupSerializer(serializers.ModelSerializer):
     options = ProductOptionSerializer(many=True, read_only=True)

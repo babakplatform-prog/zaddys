@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Apple, ArrowRight, AtSign, Eye, EyeOff, Gift, Globe2, Lock, Mail, Phone, User, UsersRound } from "lucide-react";
+import { Apple, ArrowRight, Eye, EyeOff, Gift, Globe2, Lock, Mail, Phone, User } from "lucide-react";
 import { registerUser } from "@/services/authService";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
@@ -21,7 +21,7 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const handleSocialAuth = (provider: "google" | "apple" | "facebook" | "twitter") => {
+  const handleSocialAuth = (provider: "google" | "apple") => {
     signIn(provider, { callbackUrl: sessionStorage.getItem("zaddys_auth_return") || "/" });
   };
 
@@ -47,12 +47,8 @@ export default function SignupPage() {
         phone: formData.phone,
         referralCode: formData.referralCode,
       });
-      localStorage.setItem("zaddys_access_token", data.access);
-      localStorage.setItem("zaddys_refresh_token", data.refresh);
-      alert("Account created successfully! Check your email for a welcome message.");
-      const returnPath = sessionStorage.getItem("zaddys_auth_return") || "/";
-      sessionStorage.removeItem("zaddys_auth_return");
-      router.push(returnPath);
+      sessionStorage.setItem("zaddys_pending_email", data.email || formData.email);
+      router.push("/auth/verify");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {
@@ -208,12 +204,10 @@ export default function SignupPage() {
       </form>
       <div className="mt-7 border-t border-zaddys-border pt-5">
         <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-zaddys-gray">Or continue with</p>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {([
             ["google", "Google", Globe2],
             ["apple", "Apple", Apple],
-            ["facebook", "Facebook", UsersRound],
-            ["twitter", "X", AtSign],
           ] as const).map(([provider, label, Icon]) => (
             <button key={provider} type="button" onClick={() => handleSocialAuth(provider)} className="flex items-center justify-center gap-2 rounded-xl border border-zaddys-border bg-zaddys-surface px-2 py-3 text-[12px] font-semibold text-zaddys-ink transition hover:border-zaddys-red"><Icon size={16} aria-hidden="true" /><span>{label}</span></button>
           ))}

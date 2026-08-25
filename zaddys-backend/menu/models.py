@@ -41,6 +41,7 @@ class ProductOption(models.Model):
     group = models.ForeignKey(ProductOptionGroup, on_delete=models.CASCADE, related_name='options')
     name = models.CharField(max_length=100)
     price_extra = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    image = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} (+₦{self.price_extra})"
@@ -181,6 +182,9 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
+        previous_status = None
+        if self.pk:
+            previous_status = Order.objects.filter(pk=self.pk).values_list('status', flat=True).first()
         if not self.order_number:
             from django.utils import timezone
             prefix = timezone.localdate().strftime('ZD-%Y%m%d')
@@ -188,6 +192,9 @@ class Order(models.Model):
             sequence = int(last_order.order_number.rsplit('-', 1)[-1]) + 1 if last_order else 1
             self.order_number = f'{prefix}-{sequence:04d}'
         super().save(*args, **kwargs)
+        if previous_status is not None and previous_status != self.status and self.email:
+            from .utils import send_order_status_email
+            send_order_status_email(self.email, self.customer_name or 'there', self.order_number, self.status)
 
     def __str__(self):
         return f"Order #{self.id} - ₦{self.total_price}"

@@ -27,7 +27,13 @@ services:
         sync: false
       - key: PAYSTACK_SECRET_KEY
         sync: false
+      - key: PAYSTACK_TEST_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
       - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_SERVICE_API_KEY
         sync: false
       - key: RESEND_WEBHOOK_SECRET
         sync: false

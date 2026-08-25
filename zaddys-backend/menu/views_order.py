@@ -7,6 +7,7 @@ from rest_framework import status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Coupon, Order, OrderItem, Product, DeliveryZone, LoyaltyTransaction
+from .utils import send_order_confirmation_email
 
 class OrderTrackingView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -62,9 +63,11 @@ class CreateOrderView(views.APIView):
                 quantity = int(item['quantity'])
                 if quantity < 1 or not product.is_available:
                     return Response({'error': f'{product.name} is unavailable.'}, status=status.HTTP_400_BAD_REQUEST)
-                option_ids = item.get('selected_option_ids', [])
-                options = list(product.option_groups.filter(options__id__in=option_ids).values_list('options__price_extra', flat=True)) if option_ids else []
-                unit_price = product.price + sum(options, Decimal('0'))
+                option_ids = [int(option_id) for option_id in item.get('selected_option_ids', [])]
+                option_prices = dict(product.option_groups.filter(options__id__in=option_ids).values_list('options__id', 'options__price_extra')) if option_ids else {}
+                if len(option_prices) != len(set(option_ids)):
+                    return Response({'error': f'Invalid options for {product.name}.'}, status=status.HTTP_400_BAD_REQUEST)
+                unit_price = product.price + sum((option_prices[option_id] for option_id in option_ids), Decimal('0'))
                 products.append((product, quantity, option_ids, unit_price))
                 total += unit_price * quantity
 
@@ -115,6 +118,8 @@ class CreateOrderView(views.APIView):
                     profile.points += points
                     profile.save(update_fields=['points'])
                     LoyaltyTransaction.objects.create(profile=profile, points_delta=points, reason=f'Order {order.order_number}')
+
+                    send_order_confirmation_email(order.email, order.customer_name or request.user.username, order.order_number, order.total_price)
 
             return Response({
                 'message': 'Order created securely!',

@@ -1,13 +1,13 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { Apple, ArrowLeft, AtSign, Globe2, UsersRound } from "lucide-react";
+import { Apple, ArrowLeft, Globe2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
 
-  const handleSocialAuth = (provider: "google" | "apple" | "facebook" | "twitter") => {
+  const handleSocialAuth = (provider: "google" | "apple") => {
     signIn(provider, { callbackUrl: sessionStorage.getItem("zaddys_auth_return") || "/" });
   };
 
@@ -43,12 +43,6 @@ export default function AuthPage() {
             </button>
             <button onClick={() => handleSocialAuth('apple')} className="bg-black text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-800 transition">
               <Apple size={17} /><span>Apple</span>
-            </button>
-            <button onClick={() => handleSocialAuth('facebook')} className="bg-[#1877F2] text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-[#166FE5] transition">
-              <UsersRound size={17} /><span>Facebook</span>
-            </button>
-            <button onClick={() => handleSocialAuth('twitter')} className="bg-white border border-zinc-300 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-50 transition">
-              <AtSign size={17} /><span>X</span>
             </button>
           </div>
         </div>

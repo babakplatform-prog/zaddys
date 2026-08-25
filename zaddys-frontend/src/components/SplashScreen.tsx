@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [isVisible, setIsVisible] = useState(true);
@@ -21,21 +22,12 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
           initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
         >
           <motion.div
-            initial={{ scale: 0, rotate: -180, opacity: 0 }}
-            animate={{ scale: 1, rotate: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20, duration: 1 }}
-            className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-zaddys-red bg-white shadow-2xl shadow-red-900/10"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
           >
-            <span className="text-lg font-black tracking-[0.08em] text-zaddys-red">ZADDYS</span>
+            <Image src="/zaddys-logo.jpg" alt="Zaddy's Creamery and Grills" width={260} height={140} className="h-auto w-60 object-contain" priority />
           </motion.div>
-          
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="text-3xl font-black tracking-tighter text-zaddys-red" style={{ fontFamily: 'serif' }}>
-            ZADDYS
-          </motion.h1>
-
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-4 font-sans text-xs font-bold uppercase tracking-[0.3em] text-zaddys-red">
-            Made for moments.
-          </motion.p>
         </motion.div>
       )}
     </AnimatePresence>

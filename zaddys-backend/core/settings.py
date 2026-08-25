@@ -147,9 +147,12 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
-PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', os.environ.get('EMAIL_SERVICE_API_KEY', ''))
+PAYSTACK_TEST_SECRET_KEY = os.environ.get('PAYSTACK_TEST_SECRET_KEY', '')
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', PAYSTACK_TEST_SECRET_KEY)
+PAYSTACK_WEBHOOK_SECRET = os.environ.get('PAYSTACK_WEBHOOK_SECRET', PAYSTACK_SECRET_KEY)
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'orders@zaddys.ng')
+APP_URL = os.environ.get('NEXT_PUBLIC_APP_URL', os.environ.get('APP_URL', 'http://localhost:3000'))
 RESEND_WEBHOOK_SECRET = os.environ.get('RESEND_WEBHOOK_SECRET', '')
 
 SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'

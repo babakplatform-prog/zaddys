@@ -1,8 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
-import FacebookProvider from "next-auth/providers/facebook";
-import TwitterProvider from "next-auth/providers/twitter";
 
 const handler = NextAuth({
   providers: [
@@ -13,15 +11,6 @@ const handler = NextAuth({
     AppleProvider({
       clientId: process.env.APPLE_ID as string,
       clientSecret: process.env.APPLE_SECRET as string,
-    }),
-    FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID as string,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
-    }),
-    TwitterProvider({
-      clientId: process.env.TWITTER_CLIENT_ID as string,
-      clientSecret: process.env.TWITTER_CLIENT_SECRET as string,
-      version: "2.0", 
     }),
   ],
   pages: {

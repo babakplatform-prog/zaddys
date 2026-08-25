@@ -18,9 +18,10 @@ class PaystackWebhookView(views.APIView):
     permission_classes = []
 
     def post(self, request):
+        secret = settings.PAYSTACK_WEBHOOK_SECRET or settings.PAYSTACK_SECRET_KEY
         signature = request.headers.get('x-paystack-signature', '')
         expected = hmac.new(
-            settings.PAYSTACK_SECRET_KEY.encode(),
+            secret.encode(),
             request.body,
             hashlib.sha512,
         ).hexdigest()
