@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'cloudinary_storage',
     'menu',
 ]
 
@@ -136,8 +137,17 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+cloudinary_configured = all(os.environ.get(key) for key in ('CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'))
+if cloudinary_configured:
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.environ['CLOUDINARY_CLOUD_NAME'],
+        'API_KEY': os.environ['CLOUDINARY_API_KEY'],
+        'API_SECRET': os.environ['CLOUDINARY_API_SECRET'],
+        'SECURE': True,
+    }
+
 STORAGES = {
-    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'default': {'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'} if cloudinary_configured else {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
     'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
 }
 

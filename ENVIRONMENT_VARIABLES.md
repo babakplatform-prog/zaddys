@@ -51,12 +51,17 @@ DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
 PAYSTACK_TEST_SECRET_KEY=sk_test_replace_me
 PAYSTACK_WEBHOOK_SECRET=whsec_replace_me
 PAYSTACK_SECRET_KEY=sk_test_replace_me
+CLOUDINARY_CLOUD_NAME=replace_with_cloudinary_cloud_name
+CLOUDINARY_API_KEY=replace_with_cloudinary_api_key
+CLOUDINARY_API_SECRET=replace_with_cloudinary_api_secret
 RESEND_API_KEY=re_replace_me
 EMAIL_SERVICE_API_KEY=re_replace_me
 DEFAULT_FROM_EMAIL=orders@zaddys.ng
 ```
 
 Never place `PAYSTACK_SECRET_KEY`, `RESEND_API_KEY`, Django `SECRET_KEY`, database credentials, or OAuth client secrets in frontend public variables.
+
+Get the Cloudinary values from **Cloudinary Console → Dashboard**. Add them to Render and to `zaddys-backend/.env` for local Django development. Do not add them to `zaddys-frontend/.env.local`, commit them, or expose them as `NEXT_PUBLIC_*` variables.
 
 ## Google Cloud setup
 
@@ -115,7 +120,7 @@ The active backend Admin is available at `/admin/` on the backend host:
 - `https://api.zaddys.ng/admin/` when the custom API domain is connected
 - `https://zaddys-api.onrender.com/admin/` when using the Render hostname
 
-Create a restricted staff account for client catalog and order work with `python manage.py createsuperuser` or through Admin's Users section. Products currently use remote image URLs; persistent uploads require object storage such as Cloudinary or S3 because Render's local filesystem is not durable across deploys.
+Create a restricted staff account for client catalog and order work with `python manage.py createsuperuser` or through Admin's Users section. Product and option Admin forms now accept image files from the device, while existing remote image URLs remain supported. For uploaded files to survive Render redeploys, configure `MEDIA_ROOT` on a persistent disk or move media storage to Cloudinary or S3.
 
 ## Render setup
 
