@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Headphones, Home, Search, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { getAccessToken } from "@/services/authService";
 
 export default function DockNav() {
   const pathname = usePathname();
   const { cartCount } = useCart();
+  const profilePath = getAccessToken() ? "/profile" : "/auth";
 
   // Highlight the active tab
   const isActive = (path: string) => pathname === path;
@@ -45,8 +47,8 @@ export default function DockNav() {
       </Link>
 
       {/* Profile */}
-      <Link href="/profile" className={`flex flex-col items-center space-y-1 transition ${isActive("/profile") || isActive("/login") ? "text-white" : "text-zinc-500 hover:text-zinc-300"}`}>
-        <User size={22} className={isActive("/profile") ? "fill-white/20" : ""} />
+      <Link href={profilePath} className={`flex flex-col items-center space-y-1 transition ${isActive("/profile") || isActive("/auth") || isActive("/login") ? "text-white" : "text-zinc-500 hover:text-zinc-300"}`}>
+        <User size={22} className={isActive("/profile") || isActive("/auth") ? "fill-white/20" : ""} />
         <span className="text-[11px] font-medium">Profile</span>
       </Link>
 
