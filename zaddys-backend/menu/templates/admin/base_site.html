@@ -1,9 +1,17 @@
 {% extends "admin/base.html" %}
-{% load static %}
 
 {% block extrastyle %}
   {{ block.super }}
-  <link rel="stylesheet" href="{% static 'menu/admin.css' %}">
+  <style>
+    :root { --zaddys-red: #c91414; --zaddys-black: #121212; }
+    body { background: #f7f7f7; }
+    #header { background: var(--zaddys-black); padding: 14px 24px; }
+    #branding h1, #branding h1 a:link, #branding h1 a:visited { color: #fff; font-weight: 800; letter-spacing: .04em; }
+    div.breadcrumbs { background: var(--zaddys-red); }
+    .module h2, .module caption, .inline-group h2 { background: var(--zaddys-black); color: #fff; }
+    .button, input[type="submit"], input[type="button"], .submit-row input, a.button { background: var(--zaddys-red); border-radius: 6px; }
+    .button:hover, input[type="submit"]:hover, input[type="button"]:hover, .submit-row input:hover, a.button:hover { background: #a90f0f; }
+  </style>
 {% endblock %}
 
 {% block branding %}
