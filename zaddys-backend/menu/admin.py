@@ -34,10 +34,27 @@ class CustomerAddressInline(admin.TabularInline):
 
 class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductOptionGroupInline]
+    ordering = ['category__name', 'name']
     list_display = ['name', 'category', 'price', 'inventory_status', 'is_custom_quote', 'is_available']
     list_editable = ['price', 'is_custom_quote', 'is_available']
     list_filter = ['category', 'inventory_status', 'is_available']
     search_fields = ['name', 'category__name']
+
+class CategoryAdmin(admin.ModelAdmin):
+    ordering = ['name']
+    list_display = ['name', 'product_count']
+    search_fields = ['name']
+
+    @admin.display(description='Products')
+    def product_count(self, obj):
+        return obj.products.count()
+
+class DeliveryZoneAdmin(admin.ModelAdmin):
+    ordering = ['name']
+    list_display = ['name', 'fee', 'is_active']
+    list_editable = ['fee', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['name']
 
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
@@ -111,7 +128,7 @@ class ResendWebhookEventAdmin(admin.ModelAdmin):
     readonly_fields = ['event_id', 'event_type', 'email_id', 'payload', 'received_at']
 
 admin.site.register(Product, ProductAdmin)
-admin.site.register(Category)
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem, OrderItemAdmin)
 admin.site.register(CustomerProfile, CustomerProfileAdmin)
@@ -119,7 +136,7 @@ admin.site.register(CustomerAddress, CustomerAddressAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(ProductOptionGroup, ProductOptionGroupAdmin)
 admin.site.register(ProductOption, ProductOptionAdmin)
-admin.site.register(DeliveryZone)
+admin.site.register(DeliveryZone, DeliveryZoneAdmin)
 admin.site.register(LoyaltyTransaction, LoyaltyTransactionAdmin)
 admin.site.register(ReferralRecord, ReferralRecordAdmin)
 admin.site.register(SupportConversation, SupportConversationAdmin)

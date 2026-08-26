@@ -108,6 +108,15 @@ Create a new project from this repository with:
 
 Add all variables from `zaddys-frontend/.env.example` to the Vercel Production environment, then redeploy. At minimum, replace `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`.
 
+## Django Admin
+
+The active backend Admin is available at `/admin/` on the backend host:
+
+- `https://api.zaddys.ng/admin/` when the custom API domain is connected
+- `https://zaddys-api.onrender.com/admin/` when using the Render hostname
+
+Create a restricted staff account for client catalog and order work with `python manage.py createsuperuser` or through Admin's Users section. Products currently use remote image URLs; persistent uploads require object storage such as Cloudinary or S3 because Render's local filesystem is not durable across deploys.
+
 ## Render setup
 
 Create a Web Service from the same repository with:

@@ -3,7 +3,7 @@ services:
     name: zaddys-api
     runtime: python
     rootDir: zaddys-backend
-    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py seed_menu && python manage.py seed_delivery_zones
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput && python manage.py seed_menu && python manage.py seed_delivery_zones
     startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
     healthCheckPath: /
     envVars:

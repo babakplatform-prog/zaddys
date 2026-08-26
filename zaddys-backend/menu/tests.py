@@ -3,13 +3,30 @@ import hmac
 import json
 import base64
 import time
+import tempfile
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import RequestFactory, TestCase, override_settings
 from rest_framework.test import APIClient
+from rest_framework.request import Request
 
 from .models import CustomerProfile, DeliveryZone, Order, Product, Category, ResendWebhookEvent
+from .serializers import ProductSerializer
+
+
+class ProductImageUploadTests(TestCase):
+	def test_uploaded_image_is_returned_as_frontend_image_url(self):
+		with tempfile.TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+			category = Category.objects.create(name='Grills')
+			product = Product.objects.create(name='Test Grill', category=category, price=2500)
+			product.image_upload.save('test-grill.jpg', SimpleUploadedFile('test-grill.jpg', b'image-data', content_type='image/jpeg'), save=True)
+
+			request = Request(RequestFactory().get('/api/products/'))
+			serialized = ProductSerializer(product, context={'request': request}).data
+
+			self.assertTrue(serialized['image'].endswith('/media/products/test-grill.jpg'))
 
 
 class AccountDeletionTests(TestCase):

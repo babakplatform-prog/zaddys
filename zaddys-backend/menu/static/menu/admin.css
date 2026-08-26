@@ -1,0 +1,109 @@
+:root {
+  --zaddys-red: #c91414;
+  --zaddys-black: #121212;
+  --zaddys-white: #ffffff;
+  --zaddys-gray: #666666;
+  --zaddys-border: #e8e8e8;
+}
+
+body {
+  background: #f7f7f7;
+  color: var(--zaddys-black);
+}
+
+#header {
+  background: var(--zaddys-black);
+  color: var(--zaddys-white);
+  padding: 14px 24px;
+}
+
+#branding h1,
+#branding h1 a:link,
+#branding h1 a:visited {
+  color: var(--zaddys-white);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+#user-tools,
+#user-tools a:link,
+#user-tools a:visited {
+  color: #f0f0f0;
+}
+
+#user-tools a:hover,
+a:link,
+a:visited {
+  color: var(--zaddys-red);
+}
+
+div.breadcrumbs {
+  background: var(--zaddys-red);
+  color: var(--zaddys-white);
+}
+
+div.breadcrumbs a:link,
+div.breadcrumbs a:visited {
+  color: var(--zaddys-white);
+}
+
+.module,
+.inline-group,
+#content-related {
+  border: 1px solid var(--zaddys-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--zaddys-white);
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+  background: var(--zaddys-black);
+  color: var(--zaddys-white);
+}
+
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+  background: var(--zaddys-red);
+  border-radius: 6px;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.submit-row input:hover,
+a.button:hover {
+  background: #a90f0f;
+}
+
+.selector-chosen h2 {
+  background: var(--zaddys-red);
+}
+
+#changelist-filter h2 {
+  background: var(--zaddys-black);
+}
+
+#changelist-filter li.selected a {
+  color: var(--zaddys-red);
+  font-weight: 700;
+}
+
+.messagelist li.success {
+  background: #eaf8ee;
+  border-left: 5px solid #20833e;
+}
+
+@media (max-width: 767px) {
+  #header {
+    padding: 12px 16px;
+  }
+
+  #user-tools {
+    margin-top: 8px;
+  }
+}
