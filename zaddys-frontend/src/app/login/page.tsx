@@ -1,10 +1,20 @@
+// src/app/login/page.tsx
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Apple, ArrowRight, Globe2, KeyRound, Lock, Mail } from "lucide-react";
+import { Apple, Eye, EyeOff, X, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { signIn } from "next-auth/react";
+
+// Custom Google SVG to perfectly match the requested design
+const GoogleIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+  </svg>
+);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,8 +24,10 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+  
   const handleSocialAuth = (provider: "google" | "apple") => {
     signIn(provider, { callbackUrl: sessionStorage.getItem("zaddys_auth_return") || "/" });
   };
@@ -37,8 +49,8 @@ export default function LoginPage() {
       
       // Success! Move to OTP step
       setStep(2);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Login failed");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -64,94 +76,161 @@ export default function LoginPage() {
       const returnPath = sessionStorage.getItem("zaddys_auth_return") || "/profile";
       sessionStorage.removeItem("zaddys_auth_return");
       router.push(returnPath);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid code");
+    } catch (err: any) {
+      setError(err.message || "Invalid code");
     } finally {
       setLoading(false);
     }
   };
 
+  const inputStyles = "w-full bg-transparent border border-zinc-700 rounded-[1rem] px-4 py-3.5 text-white placeholder-zinc-500 focus:border-white focus:outline-none transition text-[15px]";
+  const labelStyles = "text-[13px] text-zinc-300 font-medium block mb-1.5";
+
   return (
-    <div className="app-frame flex min-h-screen flex-col justify-center px-5 py-12 pb-36 font-sans">
-      <div className="mb-8 text-center">
-        <Image src="/zaddys-logo.PNG" alt="Zaddys" width={72} height={72} className="mx-auto mb-2 h-12 w-12 rounded-full object-cover" priority />
-        <h1 className="text-[24px] font-bold tracking-[0.08em] text-zaddys-ink">ZADDYS</h1>
-        <p className="mt-1 text-[13px] text-zaddys-gray">
-          {step === 1 ? "Welcome back. Log in to continue." : "Enter the verification code sent to your email."}
+    <main className="min-h-[100dvh] bg-[#0D0D0D] px-5 py-6 font-sans flex flex-col mx-auto max-w-md w-full relative overflow-y-auto pb-safe">
+      
+      {/* Top Header & Close Button */}
+      <div className="flex justify-end mb-4 pt-2">
+        <button 
+          onClick={() => router.back()} 
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1A1A] text-zinc-400 hover:text-white transition"
+        >
+          <X size={16} />
+        </button>
+      </div>
+
+      <div className="mb-6">
+        <h1 className="text-[26px] font-bold text-white mb-1.5 tracking-tight">
+          {step === 1 ? "Log in with your email" : "Verify your account"}
+        </h1>
+        <p className="text-zinc-400 text-[15px]">
+          {step === 1 
+            ? "Enter your email and password to log in to Zaddys" 
+            : "Enter the verification code sent to your email"}
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-center text-[13px] text-red-700">
+        <div className="mb-4 rounded-xl border border-red-900 bg-red-950/50 p-3 text-center text-[13px] text-red-200">
           {error}
         </div>
       )}
 
-      {step === 1 ? (
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="section-label mb-1 block">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3.5 text-zinc-500" size={18} />
+      {/* Forms */}
+      <div className="flex-1 flex flex-col">
+        {step === 1 ? (
+          <form onSubmit={handleLogin} className="flex-1 flex flex-col space-y-4">
+            <div className="flex flex-col gap-1.5">
+              <label className={labelStyles}>Email Address</label>
               <input
-                type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                className="field pl-10"
+                type="email" 
+                required 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email address"
+                className={inputStyles}
               />
             </div>
-          </div>
-          <div>
-            <label className="section-label mb-1 block">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3.5 text-zinc-500" size={18} />
-              <input
-                type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-                className="field pl-10"
-              />
+
+            <div className="flex flex-col gap-1.5">
+              <label className={labelStyles}>Password</label>
+              <div className="relative flex items-center">
+                <input
+                  type={showPassword ? "text" : "password"} 
+                  required 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className={inputStyles}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 text-zinc-400 hover:text-white transition"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
-          </div>
-          <button type="submit" disabled={loading} className="w-full rounded-xl bg-zaddys-red py-3.5 font-semibold text-white transition hover:bg-red-700">
-            {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <span>Login Securely</span>}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handleVerifyOTP} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase text-zinc-400 mb-1">6-Digit Code</label>
-            <div className="relative">
-              <KeyRound className="absolute left-3 top-3.5 text-zinc-500" size={18} />
+
+            <div className="mt-auto pt-6 flex flex-col gap-4">
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full bg-[#D90429] text-white font-semibold py-4 rounded-[1rem] hover:bg-red-700 transition flex justify-center items-center text-[15px]"
+              >
+                {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Log in securely"}
+              </button>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => handleSocialAuth('google')} 
+                  className="flex items-center justify-center gap-2 py-3.5 rounded-[1rem] border border-zinc-700 bg-transparent hover:bg-zinc-800 transition"
+                >
+                  <GoogleIcon />
+                  <span className="font-semibold text-white text-[14px]">Google</span>
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => handleSocialAuth('apple')} 
+                  className="flex items-center justify-center gap-2 py-3.5 rounded-[1rem] border border-zinc-700 bg-transparent hover:bg-zinc-800 transition"
+                >
+                  <Apple size={20} className="fill-white text-white" />
+                  <span className="font-semibold text-white text-[14px]">Apple</span>
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-4 pb-4 text-center text-[13px] text-zinc-400">
+              Don't have an account yet?{" "}
+              <Link href="/signup" className="text-white font-bold hover:underline transition">
+                sign up
+              </Link>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOTP} className="flex-1 flex flex-col space-y-4">
+            <div className="flex flex-col gap-1.5 mt-2">
+              <label className={labelStyles}>6-Digit Code</label>
               <input
-                type="text" maxLength={6} required value={otp} onChange={(e) => setOtp(e.target.value)}
+                type="text" 
+                maxLength={6} 
+                required 
+                value={otp} 
+                onChange={(e) => setOtp(e.target.value)}
                 placeholder="000000"
-                className="field pl-10 text-center text-lg font-bold tracking-[1em]"
+                className="w-full bg-transparent border border-zinc-700 rounded-[1rem] px-4 py-4 text-white placeholder-zinc-700 focus:border-white focus:outline-none transition text-center text-2xl font-bold tracking-[0.5em]"
               />
             </div>
-          </div>
-          <button type="submit" disabled={loading} className="w-full rounded-xl bg-zaddys-black py-3.5 font-semibold text-white transition hover:bg-zinc-800">
-            {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div> : <><span>Verify & Enter</span><ArrowRight size={18} /></>}
-          </button>
-          <button type="button" onClick={() => setStep(1)} className="mt-4 w-full text-[13px] text-zaddys-gray transition hover:text-zaddys-ink">
-            Back to Login
-          </button>
-        </form>
-      )}
-      {step === 1 && (
-        <>
-          <div className="mt-7 border-t border-zaddys-border pt-5">
-            <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-zaddys-gray">Or continue with</p>
-            <div className="grid grid-cols-2 gap-2">
-              {([
-                ["google", "Google", Globe2],
-                ["apple", "Apple", Apple],
-              ] as const).map(([provider, label, Icon]) => (
-                <button key={provider} type="button" onClick={() => handleSocialAuth(provider)} className="flex items-center justify-center gap-2 rounded-xl border border-zaddys-border bg-zaddys-surface px-2 py-3 text-[12px] font-semibold text-zaddys-ink transition hover:border-zaddys-red"><Icon size={16} aria-hidden="true" /><span>{label}</span></button>
-              ))}
+
+            <div className="mt-auto pt-6 flex flex-col gap-4 pb-4">
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full bg-[#D90429] text-white font-semibold py-4 rounded-[1rem] hover:bg-red-700 transition flex justify-center items-center gap-2 text-[15px]"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <span>Verify & Enter</span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+              
+              <button 
+                type="button" 
+                onClick={() => setStep(1)} 
+                className="w-full py-4 rounded-[1rem] border border-zinc-700 bg-transparent hover:bg-zinc-800 text-white font-semibold transition text-[15px]"
+              >
+                Back to Login
+              </button>
             </div>
-          </div>
-          <p className="mt-6 text-center text-[13px] text-zaddys-gray">
-            New to ZADDYS? <Link href="/signup" className="font-semibold text-zaddys-red hover:underline">Create an account</Link>
-          </p>
-        </>
-      )}
-    </div>
+          </form>
+        )}
+      </div>
+    </main>
   );
 }
