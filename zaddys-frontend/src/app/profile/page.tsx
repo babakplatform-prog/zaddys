@@ -4,6 +4,7 @@ import { ArrowLeft, Package, Star, Gift, LogOut, Copy, Trash2 } from "lucide-rea
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAccessToken } from "@/services/authService";
+import ZaddysLoader from "@/components/ZaddysLoader";
 
 type Order = { id: number; order_number?: string; total_price: number | string; status: string };
 type Profile = { name: string; email: string; phone?: string; referral_code?: string; points: number; orders: Order[] };
@@ -62,11 +63,7 @@ export default function ProfileDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white">
-        <div className="w-8 h-8 border-4 border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
-      </div>
-    );
+    return <ZaddysLoader />;
   }
 
   return (

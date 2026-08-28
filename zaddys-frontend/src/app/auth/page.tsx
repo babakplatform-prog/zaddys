@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Apple, ArrowLeft, Globe2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 // High-resolution Zaddys meal images for the automated background crossfade
 const CAROUSEL_IMAGES = [
@@ -50,6 +51,9 @@ export default function AuthPage() {
 
       {/* 3. Top Layer Interface (z-20) */}
       <div className="relative z-20 mx-auto flex h-full w-full max-w-md flex-col justify-end px-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
+        <div className="absolute left-1/2 top-7 -translate-x-1/2">
+          <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={132} height={60} className="h-12 w-auto object-contain" priority />
+        </div>
         
         {/* Safe Area Back Button */}
         <div className="absolute left-6 top-12">

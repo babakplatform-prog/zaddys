@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function VerifyOTP() {
   const router = useRouter();
@@ -81,17 +82,20 @@ export default function VerifyOTP() {
   };
 
   return (
-    <main className="min-h-screen bg-zaddys-black text-zaddys-white font-sans px-4 py-6 flex flex-col relative">
+    <main className="min-h-screen bg-[#111111] text-zaddys-white font-sans px-2 py-5 flex flex-col relative">
+      <div className="flex justify-center pt-1">
+        <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={112} height={52} className="h-10 w-auto object-contain" priority />
+      </div>
       <Link href="/auth" className="absolute top-6 left-4 text-zinc-400 hover:text-white transition">
         <ArrowLeft size={24} />
       </Link>
 
       <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full mt-10 text-center">
-        <h1 className="text-3xl font-black mb-2 tracking-tight">Verify Account</h1>
-        <p className="text-zinc-400 text-sm mb-8 px-4">
+        <h1 className="text-[17px] font-bold mb-2 tracking-tight">Verify your account</h1>
+        <p className="text-zinc-400 text-[11px] mb-8 px-4">
           We&apos;ve sent a 6-digit code to your email. Enter it below to verify your account.
         </p>
-        {error && <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && <p className="mb-4 rounded-lg bg-red-950/50 p-3 text-[11px] text-red-200">{error}</p>}
 
         <form onSubmit={handleVerify}>
         <div className="flex justify-center space-x-2 mb-8">
@@ -111,12 +115,12 @@ export default function VerifyOTP() {
           ))}
         </div>
 
-        <button disabled={loading || otp.join("").length !== 6 || !email} className="w-full bg-zaddys-red text-white font-bold rounded-xl py-3.5 hover:bg-red-700 transition disabled:opacity-50">
+        <button disabled={loading || otp.join("").length !== 6 || !email} className="w-full bg-[#ff3b12] text-white font-bold rounded-[0.65rem] py-3 hover:bg-red-700 transition disabled:opacity-50">
           Verify & Continue
         </button>
         </form>
 
-        <div className="mt-8 text-sm text-zinc-400">
+        <div className="mt-8 text-[11px] text-zinc-400">
           Didn&apos;t receive the code? <button type="button" onClick={handleResend} disabled={resending || !email} className="font-bold text-zaddys-red disabled:opacity-50">{resending ? "Sending..." : "Resend code"}</button>
         </div>
       </div>

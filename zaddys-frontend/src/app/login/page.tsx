@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Apple, Eye, EyeOff, X, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import Image from "next/image";
 
 // Custom Google SVG to perfectly match the requested design
 const GoogleIcon = () => (
@@ -82,27 +83,28 @@ export default function LoginPage() {
     }
   };
 
-  const inputStyles = "w-full bg-transparent border border-zinc-700 rounded-[1rem] px-4 py-3.5 text-white placeholder-zinc-500 focus:border-white focus:outline-none transition text-[15px]";
-  const labelStyles = "text-[13px] text-zinc-300 font-medium block mb-1.5";
+  const inputStyles = "w-full bg-transparent border border-zinc-600 rounded-[0.65rem] px-3 py-2.5 text-white placeholder-zinc-500 focus:border-white focus:outline-none transition text-[12px]";
+  const labelStyles = "text-[11px] text-zinc-300 font-medium block mb-1.5";
 
   return (
-    <main className="min-h-[100dvh] bg-[#0D0D0D] px-5 py-6 font-sans flex flex-col mx-auto max-w-md w-full relative overflow-y-auto pb-safe">
+    <main className="min-h-[100dvh] bg-[#111111] px-2 py-5 font-sans flex flex-col mx-auto max-w-md w-full relative overflow-y-auto pb-safe">
       
       {/* Top Header & Close Button */}
-      <div className="flex justify-end mb-4 pt-2">
+      <div className="relative flex items-center justify-center mb-5 pt-1 min-h-10">
+        <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={112} height={52} className="h-10 w-auto object-contain" priority />
         <button 
           onClick={() => router.back()} 
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1A1A] text-zinc-400 hover:text-white transition"
+          className="absolute right-0 flex items-center justify-center w-7 h-7 rounded-full bg-[#263138] text-zinc-300 hover:text-white transition"
         >
           <X size={16} />
         </button>
       </div>
 
-      <div className="mb-6">
-        <h1 className="text-[26px] font-bold text-white mb-1.5 tracking-tight">
+      <div className="mb-5">
+        <h1 className="text-[17px] font-bold text-white mb-1 tracking-tight">
           {step === 1 ? "Log in with your email" : "Verify your account"}
         </h1>
-        <p className="text-zinc-400 text-[15px]">
+        <p className="text-zinc-400 text-[11px]">
           {step === 1 
             ? "Enter your email and password to log in to Zaddys" 
             : "Enter the verification code sent to your email"}
@@ -110,7 +112,7 @@ export default function LoginPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-red-900 bg-red-950/50 p-3 text-center text-[13px] text-red-200">
+        <div className="mb-4 rounded-lg border border-red-900 bg-red-950/50 p-3 text-center text-[11px] text-red-200">
           {error}
         </div>
       )}
@@ -152,36 +154,36 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="mt-auto pt-6 flex flex-col gap-4">
+            <div className="mt-auto pt-5 flex flex-col gap-2">
               <button 
                 type="submit" 
                 disabled={loading} 
-                className="w-full bg-[#D90429] text-white font-semibold py-4 rounded-[1rem] hover:bg-red-700 transition flex justify-center items-center text-[15px]"
+                className="w-full bg-[#ff3b12] text-white font-semibold py-3 rounded-[0.65rem] hover:bg-red-700 transition flex justify-center items-center text-[12px]"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Log in securely"}
               </button>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-2">
                 <button 
                   type="button" 
                   onClick={() => handleSocialAuth('google')} 
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-[1rem] border border-zinc-700 bg-transparent hover:bg-zinc-800 transition"
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] bg-white text-black hover:bg-zinc-100 transition"
                 >
                   <GoogleIcon />
-                  <span className="font-semibold text-white text-[14px]">Google</span>
+                  <span className="font-semibold text-black text-[11px]">Continue with Google</span>
                 </button>
                 <button 
                   type="button" 
                   onClick={() => handleSocialAuth('apple')} 
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-[1rem] border border-zinc-700 bg-transparent hover:bg-zinc-800 transition"
+                  className="flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] bg-white text-black hover:bg-zinc-100 transition"
                 >
                   <Apple size={20} className="fill-white text-white" />
-                  <span className="font-semibold text-white text-[14px]">Apple</span>
+                  <span className="font-semibold text-black text-[11px]">Continue with Apple</span>
                 </button>
               </div>
             </div>
             
-            <div className="mt-4 pb-4 text-center text-[13px] text-zinc-400">
+            <div className="mt-3 pb-4 text-center text-[10px] text-zinc-400">
               Don't have an account yet?{" "}
               <Link href="/signup" className="text-white font-bold hover:underline transition">
                 sign up
