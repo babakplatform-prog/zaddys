@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Apple, ArrowLeft, Globe2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 
@@ -30,10 +31,13 @@ export default function AuthPage() {
       
       {/* 1. Dynamic Background Carousel (z-0) */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#0D0D0D]">
-        <img
+        <Image
           key={currentIndex}
           src={CAROUSEL_IMAGES[currentIndex]}
           alt="Zaddys Moments"
+          fill
+          unoptimized
+          sizes="100vw"
           className="absolute inset-0 h-full w-full object-cover opacity-50 transition-opacity duration-1000"
         />
         
@@ -89,7 +93,7 @@ export default function AuthPage() {
 
         {/* Navigation Footer */}
         <div className="mt-8 text-center text-sm text-zinc-400">
-          Don't have an account yet?{" "}
+          Don&apos;t have an account yet?{" "}
           <Link href="/signup" className="font-bold text-white transition hover:text-[#D90429]">
             sign up
           </Link>

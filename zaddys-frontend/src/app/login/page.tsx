@@ -48,8 +48,8 @@ export default function LoginPage() {
       
       // Success! Move to OTP step
       setStep(2);
-    } catch (err: any) {
-      setError(err.message || "Login failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
     }
@@ -75,8 +75,8 @@ export default function LoginPage() {
       const returnPath = sessionStorage.getItem("zaddys_auth_return") || "/profile";
       sessionStorage.removeItem("zaddys_auth_return");
       router.push(returnPath);
-    } catch (err: any) {
-      setError(err.message || "Invalid code");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Invalid code");
     } finally {
       setLoading(false);
     }
@@ -182,7 +182,7 @@ export default function LoginPage() {
             </div>
             
             <div className="mt-3 pb-4 text-center text-[10px] text-zinc-400">
-              Don't have an account yet?{" "}
+              Don&apos;t have an account yet?{" "}
               <Link href="/signup" className="text-white font-bold hover:underline transition">
                 sign up
               </Link>

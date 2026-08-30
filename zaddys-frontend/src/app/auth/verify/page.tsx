@@ -14,7 +14,8 @@ export default function VerifyOTP() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    setEmail(sessionStorage.getItem("zaddys_pending_email") || "");
+    const timer = window.setTimeout(() => setEmail(sessionStorage.getItem("zaddys_pending_email") || ""), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleChange = (index: number, value: string) => {

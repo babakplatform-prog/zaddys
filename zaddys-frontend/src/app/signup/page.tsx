@@ -61,9 +61,9 @@ export default function SignupPage() {
         referralCode: formData.referralCode,
       });
       sessionStorage.setItem("zaddys_pending_email", data.email || formData.email);
-      window.location.assign("/auth/verify");
-    } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+      router.push("/auth/verify");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -199,6 +199,14 @@ export default function SignupPage() {
                 placeholder="Confirm"
                 className={inputStyles}
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 text-zinc-400 hover:text-white transition"
+                aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
           <div className="flex flex-col gap-1.5">

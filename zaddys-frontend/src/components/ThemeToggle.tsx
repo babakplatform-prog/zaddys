@@ -11,8 +11,11 @@ export default function ThemeToggle() {
   useEffect(() => {
     const saved = window.localStorage.getItem("zaddys_theme") as ThemeMode | null;
     const nextMode = saved === "light" || saved === "dark" || saved === "system" ? saved : "system";
-    setMode(nextMode);
-    applyTheme(nextMode);
+    const timer = window.setTimeout(() => {
+      setMode(nextMode);
+      applyTheme(nextMode);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const cycleTheme = () => {

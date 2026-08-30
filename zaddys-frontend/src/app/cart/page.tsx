@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -14,8 +14,6 @@ declare global {
     PaystackPop?: { setup: (config: Record<string, unknown>) => { openIframe: () => void } };
   }
 }
-
-let paystackScriptPromise: Promise<void> | null = null;
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
@@ -37,6 +35,8 @@ export default function CartPage() {
   const [hasToken] = useState(() => Boolean(getAccessToken()));
   const [profileLoading, setProfileLoading] = useState(() => hasToken);
   const [zonesError, setZonesError] = useState("");
+  const paystackScriptPromise = useRef<Promise<void> | null>(null);
+  const paymentSequence = useRef(0);
   const payableTotal = Math.max(0, cartTotal + deliveryFee - discount);
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -130,7 +130,7 @@ export default function CartPage() {
 
     try {
       if (!window.PaystackPop) {
-        paystackScriptPromise ??= new Promise<void>((resolve, reject) => {
+        paystackScriptPromise.current ??= new Promise<void>((resolve, reject) => {
           const existingScript = document.querySelector<HTMLScriptElement>('script[data-paystack="inline"]');
           if (existingScript) {
             existingScript.addEventListener("load", () => resolve(), { once: true });
@@ -144,19 +144,19 @@ export default function CartPage() {
           script.onerror = () => reject(new Error("Paystack failed to load"));
           document.body.appendChild(script);
         });
-        await paystackScriptPromise;
+        await paystackScriptPromise.current;
       }
       if (!window.PaystackPop) throw new Error("Paystack SDK unavailable");
       window.PaystackPop.setup({
         key: publicKey,
         email,
         amount: Math.round(payableTotal * 100),
-        ref: `ZD-${Date.now()}`,
+        ref: `ZD-${++paymentSequence.current}`,
         callback: onSuccess,
         onClose,
       }).openIframe();
     } catch (error) {
-      paystackScriptPromise = null;
+      paystackScriptPromise.current = null;
       setIsProcessing(false);
       console.error("Paystack initialization error:", error);
       alert("Payment is unavailable right now. Please try again.");
