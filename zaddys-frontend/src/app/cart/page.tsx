@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useId, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -37,6 +37,7 @@ export default function CartPage() {
   const [zonesError, setZonesError] = useState("");
   const paystackScriptPromise = useRef<Promise<void> | null>(null);
   const paymentSequence = useRef(0);
+  const paymentId = useId().replace(/:/g, "");
   const payableTotal = Math.max(0, cartTotal + deliveryFee - discount);
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -151,7 +152,7 @@ export default function CartPage() {
         key: publicKey,
         email,
         amount: Math.round(payableTotal * 100),
-        ref: `ZD-${++paymentSequence.current}`,
+        ref: `ZD-${paymentId}-${++paymentSequence.current}`,
         callback: onSuccess,
         onClose,
       }).openIframe();
