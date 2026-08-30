@@ -121,7 +121,7 @@ export default function HomePage() {
   if (showSplash) {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-white">
-        <ZaddysLoader label="Made for moments" />
+        <ZaddysLoader />
       </div>
     );
   }
@@ -134,7 +134,6 @@ export default function HomePage() {
       {/* Header Section */}
       <div className="relative z-10 border-b border-zinc-100 bg-white px-5 pb-6 pt-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
         <div className="mb-8 flex items-center justify-between">
-          <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={150} height={70} className="h-12 w-auto object-contain" />
           <Link href="/cart" aria-label="Open cart" className="relative rounded-full bg-zaddys-surface p-2 text-zaddys-ink">
             <ShoppingBag size={19} />
           </Link>
@@ -192,7 +191,7 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <ZaddysLoader label="Loading the menu" />
+          <ZaddysLoader />
         ) : (
           menuError ? (
             <div className="rounded-2xl border border-red-100 bg-red-50 p-5 text-center">

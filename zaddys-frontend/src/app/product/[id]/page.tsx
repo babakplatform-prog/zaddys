@@ -159,7 +159,7 @@ export default function ProductDetailPage() {
   };
 
   if (loading) {
-    return <ZaddysLoader label="Loading your selection" />;
+    return <ZaddysLoader />;
   }
 
   if (!product) return <div className="min-h-screen bg-white text-black p-6">Product not found.</div>;
@@ -338,7 +338,7 @@ export default function ProductDetailPage() {
               <div><h2 id="drinks-title" className="text-xl font-black text-zaddys-ink">Add a drink</h2><p className="text-xs text-zaddys-gray">Keep your order together.</p></div>
               <button type="button" onClick={() => setDrinksOpen(false)} aria-label="Close drinks" className="rounded-full bg-zaddys-surface p-2"><X size={18} /></button>
             </div>
-            {drinksLoading && <p className="py-8 text-center text-sm text-zaddys-gray">Loading drinks...</p>}
+            {drinksLoading && <ZaddysLoader />}
             {!drinksLoading && drinks.length === 0 && <p className="py-8 text-center text-sm text-zaddys-gray">No drinks are available right now.</p>}
             <div className="grid grid-cols-2 gap-3">
               {drinks.map((drink) => {

@@ -3,8 +3,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Apple, ArrowLeft, Globe2 } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
 
 // High-resolution Zaddys meal images for the automated background crossfade
 const CAROUSEL_IMAGES = [
@@ -32,18 +30,12 @@ export default function AuthPage() {
       
       {/* 1. Dynamic Background Carousel (z-0) */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#0D0D0D]">
-        <AnimatePresence mode="popLayout">
-          <motion.img
-            key={currentIndex}
-            src={CAROUSEL_IMAGES[currentIndex]}
-            alt="Zaddys Moments"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 0.5, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </AnimatePresence>
+        <img
+          key={currentIndex}
+          src={CAROUSEL_IMAGES[currentIndex]}
+          alt="Zaddys Moments"
+          className="absolute inset-0 h-full w-full object-cover opacity-50 transition-opacity duration-1000"
+        />
         
         {/* 2. Heavy Bottom Gradient for Text Legibility (z-10) */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/90 to-transparent" />
@@ -51,9 +43,6 @@ export default function AuthPage() {
 
       {/* 3. Top Layer Interface (z-20) */}
       <div className="relative z-20 mx-auto flex h-full w-full max-w-md flex-col justify-end px-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
-        <div className="absolute left-1/2 top-7 -translate-x-1/2">
-          <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={132} height={60} className="h-12 w-auto object-contain" priority />
-        </div>
         
         {/* Safe Area Back Button */}
         <div className="absolute left-6 top-12">

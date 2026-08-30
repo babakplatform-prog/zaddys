@@ -38,13 +38,7 @@ export default function GetStartedPage() {
 
         <div className="flex flex-1 flex-col justify-center py-8">
           <p className="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-white/60">Creamery &amp; Grills</p>
-          <h1 className="max-w-sm text-[42px] font-black leading-[0.98] sm:text-5xl">
-            Affordability,
-            <br />
-            quality,
-            <br />
-            and now <span className="text-zaddys-red">ease.</span>
-          </h1>
+          <h1 className="max-w-sm text-[42px] font-black leading-[0.98] sm:text-5xl">Welcome to <span className="text-zaddys-red">Zaddys.</span></h1>
 
           <div className="relative mt-8 overflow-hidden rounded-[1.1rem] border border-white/10 bg-zaddys-red p-2 shadow-2xl shadow-black/30">
             <div className="relative grid grid-cols-2 gap-2 overflow-hidden rounded-[0.8rem] bg-white p-2">

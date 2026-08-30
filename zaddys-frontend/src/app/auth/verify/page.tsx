@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 export default function VerifyOTP() {
   const router = useRouter();
@@ -84,7 +83,6 @@ export default function VerifyOTP() {
   return (
     <main className="min-h-screen bg-[#111111] text-zaddys-white font-sans px-2 py-5 flex flex-col relative">
       <div className="flex justify-center pt-1">
-        <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={112} height={52} className="h-10 w-auto object-contain" priority />
       </div>
       <Link href="/auth" className="absolute top-6 left-4 text-zinc-400 hover:text-white transition">
         <ArrowLeft size={24} />

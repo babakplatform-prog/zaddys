@@ -22,22 +22,21 @@ export default function CartPage() {
   const router = useRouter();
   
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryCoordinates, setDeliveryCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState(""); // Needed for Paystack receipt
   const [landmark, setLandmark] = useState("");
   const [deliveryNotes, setDeliveryNotes] = useState("");
-  const [deliveryZones, setDeliveryZones] = useState<{ id: number; name: string; fee: number }[]>(fallbackDeliveryZones);
-  const [deliveryZoneId, setDeliveryZoneId] = useState("");
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [distanceKm, setDistanceKm] = useState<number | null>(null);
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasToken] = useState(() => Boolean(getAccessToken()));
   const [profileLoading, setProfileLoading] = useState(() => hasToken);
-  const [zonesLoading, setZonesLoading] = useState(() => hasToken);
   const [zonesError, setZonesError] = useState("");
-  const deliveryFee = Number(deliveryZones.find((zone) => String(zone.id) === deliveryZoneId)?.fee || 0);
   const payableTotal = Math.max(0, cartTotal + deliveryFee - discount);
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -65,24 +64,19 @@ export default function CartPage() {
     const token = getAccessToken();
     Promise.all([
       token ? fetch(`${apiUrl}/profile/`, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.ok ? res.json() as Promise<Profile> : null) : Promise.resolve(null),
-      fetch(`${apiUrl}/delivery-zones/`).then((res) => res.ok ? res.json() : Promise.reject(new Error("Delivery zones unavailable"))),
     ])
-      .then(([profile, zones]) => {
+      .then(([profile]) => {
         if (profile) {
           setCustomerName(profile.name);
           setEmail(profile.email);
           setPhone(profile.phone || "");
         }
-        const availableZones = Array.isArray(zones) ? zones : zones.results || zones.data || zones.zones || [];
-        setDeliveryZones(availableZones.length ? availableZones : fallbackDeliveryZones);
       })
       .catch(() => {
-        setDeliveryZones(fallbackDeliveryZones);
-        setZonesError("Showing standard delivery areas while live areas reconnect.");
+        setZonesError("We could not load your account details.");
       })
       .finally(() => {
         setProfileLoading(false);
-        setZonesLoading(false);
       });
   }, []);
 
@@ -106,7 +100,8 @@ export default function CartPage() {
           phone: phone,
           landmark,
           delivery_notes: deliveryNotes,
-          delivery_zone_id: deliveryZoneId,
+          delivery_latitude: deliveryCoordinates?.lat,
+          delivery_longitude: deliveryCoordinates?.lng,
           coupon_code: couponCode,
           transaction_ref: reference.reference
         }),
@@ -127,7 +122,7 @@ export default function CartPage() {
 
   const initializePayment = async () => {
     const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
-    if (!publicKey || !publicKey.startsWith("pk_test_")) {
+    if (!publicKey || !publicKey.startsWith("pk_test_") || payableTotal <= 0) {
       setIsProcessing(false);
       alert("Paystack test mode is not configured. Please contact support.");
       return;
@@ -181,8 +176,8 @@ export default function CartPage() {
       router.push("/login");
       return;
     }
-    if (profileLoading || zonesLoading) return alert("Loading your checkout details. Please wait a moment.");
-    if (!customerName || !email || !phone || !deliveryAddress || !landmark || !deliveryZoneId || deliveryZones.length === 0) {
+    if (profileLoading) return alert("Your checkout details are still loading. Please wait a moment.");
+    if (!customerName || !email || !phone || !deliveryAddress || !landmark || !deliveryCoordinates || deliveryFee <= 0) {
       return alert("Please fill all required delivery details.");
     }
     
@@ -251,7 +246,7 @@ export default function CartPage() {
         <form id="checkout-form" onSubmit={handleCheckout} className="space-y-3 mb-6">
           <div className="rounded-xl border border-zaddys-border bg-zaddys-surface px-4 py-3 text-[13px] text-zaddys-ink">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-zaddys-gray">Ordering as</p>
-            <p className="font-semibold">{profileLoading ? "Loading account..." : customerName}</p>
+            <p className="font-semibold">{customerName}</p>
             <p className="text-zaddys-gray">{email}</p>
           </div>
           <input 
@@ -266,9 +261,26 @@ export default function CartPage() {
                 id="delivery-address"
                 apiKey={mapsApiKey}
                 options={{ types: ["address"], componentRestrictions: { country: "ng" } }}
-                onPlaceSelected={(place) => setDeliveryAddress(place.formatted_address || "")}
+                onPlaceSelected={(place) => {
+                  setDeliveryAddress(place.formatted_address || "");
+                  const location = place.geometry?.location;
+                  if (!location) return;
+                  const lat = typeof location.lat === "function" ? location.lat() : location.lat;
+                  const lng = typeof location.lng === "function" ? location.lng() : location.lng;
+                  setDeliveryCoordinates({ lat, lng });
+                  void fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api"}/delivery-quote/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ latitude: lat, longitude: lng }),
+                  }).then((response) => response.json()).then((quote) => {
+                    if (quote.fee) {
+                      setDeliveryFee(Number(quote.fee));
+                      setDistanceKm(Number(quote.distance_km));
+                    }
+                  });
+                }}
                 value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
+                onChange={(e) => { setDeliveryAddress(e.target.value); setDeliveryCoordinates(null); setDeliveryFee(0); setDistanceKm(null); }}
                 placeholder="Full Delivery Address"
                 className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 pl-10 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
               />
@@ -278,17 +290,14 @@ export default function CartPage() {
                 required
                 type="text"
                 value={deliveryAddress}
-                onChange={(e) => setDeliveryAddress(e.target.value)}
+                onChange={(e) => { setDeliveryAddress(e.target.value); setDeliveryCoordinates(null); setDeliveryFee(0); setDistanceKm(null); }}
                 placeholder="Full Delivery Address"
                 className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 pl-10 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm"
               />
             )}
           </div>
           <input type="text" required value={landmark} onChange={(e) => setLandmark(e.target.value)} placeholder="Nearest Landmark" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
-          <select required value={deliveryZoneId} onChange={(e) => setDeliveryZoneId(e.target.value)} className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red focus:outline-none focus:border-red-600 shadow-sm">
-            <option value="">{zonesLoading ? "Loading delivery areas..." : "Select delivery area"}</option>
-            {deliveryZones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name} - ₦{Number(zone.fee).toLocaleString()}</option>)}
-          </select>
+          {deliveryFee > 0 && <p className="text-xs font-semibold text-zaddys-red">Delivery calculated from {distanceKm?.toFixed(1)} km away.</p>}
           {zonesError && <p className="text-xs font-semibold text-zaddys-red">{zonesError}</p>}
           <div className="flex gap-2">
             <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="Coupon code" className="min-w-0 flex-1 bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
@@ -330,10 +339,3 @@ export default function CartPage() {
 type PaystackReference = { reference: string };
 type Profile = { name: string; email: string; phone?: string };
 
-const fallbackDeliveryZones = [
-  { id: 1, name: "Ilorin GRA", fee: 1500 },
-  { id: 2, name: "Tanke", fee: 1500 },
-  { id: 3, name: "Fate", fee: 2000 },
-  { id: 4, name: "Adewole", fee: 1500 },
-  { id: 5, name: "University Road", fee: 2000 },
-];

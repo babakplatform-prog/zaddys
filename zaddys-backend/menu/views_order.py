@@ -1,4 +1,5 @@
 import json
+import math
 from decimal import Decimal
 import requests
 from django.conf import settings
@@ -8,6 +9,27 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Coupon, Order, OrderItem, Product, DeliveryZone, LoyaltyTransaction
 from .utils import send_order_confirmation_email
+
+def distance_based_delivery_fee(latitude, longitude):
+    origin_lat = math.radians(settings.DELIVERY_ORIGIN_LAT)
+    origin_lng = math.radians(settings.DELIVERY_ORIGIN_LNG)
+    target_lat = math.radians(float(latitude))
+    target_lng = math.radians(float(longitude))
+    delta_lat = target_lat - origin_lat
+    delta_lng = target_lng - origin_lng
+    haversine = math.sin(delta_lat / 2) ** 2 + math.cos(origin_lat) * math.cos(target_lat) * math.sin(delta_lng / 2) ** 2
+    distance_km = 6371 * 2 * math.atan2(math.sqrt(haversine), math.sqrt(1 - haversine))
+    return round(settings.DELIVERY_BASE_FEE + distance_km * settings.DELIVERY_RATE_PER_KM, 2), distance_km
+
+class DeliveryQuoteView(views.APIView):
+    permission_classes = []
+
+    def post(self, request):
+        try:
+            fee, distance_km = distance_based_delivery_fee(request.data['latitude'], request.data['longitude'])
+        except (KeyError, TypeError, ValueError):
+            return Response({'error': 'A valid delivery location is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'fee': fee, 'distance_km': round(distance_km, 2)})
 
 class OrderTrackingView(views.APIView):
     permission_classes = [IsAuthenticated]
@@ -32,8 +54,7 @@ class CreateOrderView(views.APIView):
         data = request.data
         reference = data.get('transaction_ref')
         cart_items = data.get('cart', [])
-        zone_id = data.get('delivery_zone_id')
-        if not reference or not cart_items or not zone_id:
+        if not reference or not cart_items:
             return Response({'error': 'Payment reference and cart are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -57,7 +78,10 @@ class CreateOrderView(views.APIView):
 
             products = []
             total = Decimal('0')
-            delivery_zone = DeliveryZone.objects.get(id=zone_id, is_active=True)
+            try:
+                delivery_fee, _ = distance_based_delivery_fee(data['delivery_latitude'], data['delivery_longitude'])
+            except (KeyError, TypeError, ValueError):
+                return Response({'error': 'A valid delivery location is required.'}, status=status.HTTP_400_BAD_REQUEST)
             for item in cart_items:
                 product = Product.objects.get(id=item['id'])
                 quantity = int(item['quantity'])
@@ -71,7 +95,7 @@ class CreateOrderView(views.APIView):
                 products.append((product, quantity, option_ids, unit_price))
                 total += unit_price * quantity
 
-            total += delivery_zone.fee
+            total += Decimal(str(delivery_fee))
             discount = Decimal('0')
             coupon_code = str(data.get('coupon_code', '')).strip().upper()
             coupon = Coupon.objects.filter(code=coupon_code).first() if coupon_code else None
@@ -96,8 +120,8 @@ class CreateOrderView(views.APIView):
                     city=data.get('city'),
                     delivery_notes=data.get('delivery_notes', ''),
                     preferred_delivery_time=data.get('preferred_delivery_time'),
-                    delivery_zone=delivery_zone,
-                    delivery_fee=delivery_zone.fee,
+                    delivery_zone=None,
+                    delivery_fee=delivery_fee,
                     coupon_code=coupon.code if coupon else '',
                     discount_amount=discount,
                     payment_reference=reference,

@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { Apple, Eye, EyeOff, X, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import Image from "next/image";
 
 // Custom Google SVG to perfectly match the requested design
 const GoogleIcon = () => (
@@ -91,7 +90,6 @@ export default function LoginPage() {
       
       {/* Top Header & Close Button */}
       <div className="relative flex items-center justify-center mb-5 pt-1 min-h-10">
-        <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={112} height={52} className="h-10 w-auto object-contain" priority />
         <button 
           onClick={() => router.back()} 
           className="absolute right-0 flex items-center justify-center w-7 h-7 rounded-full bg-[#263138] text-zinc-300 hover:text-white transition"
@@ -160,7 +158,7 @@ export default function LoginPage() {
                 disabled={loading} 
                 className="w-full bg-[#ff3b12] text-white font-semibold py-3 rounded-[0.65rem] hover:bg-red-700 transition flex justify-center items-center text-[12px]"
               >
-                {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Log in securely"}
+                {loading ? "Signing in..." : "Log in securely"}
               </button>
 
               <div className="grid grid-cols-1 gap-2">
@@ -211,9 +209,7 @@ export default function LoginPage() {
                 disabled={loading} 
                 className="w-full bg-[#D90429] text-white font-semibold py-4 rounded-[1rem] hover:bg-red-700 transition flex justify-center items-center gap-2 text-[15px]"
               >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
+                {loading ? "Verifying..." : (
                   <>
                     <span>Verify & Enter</span>
                     <ArrowRight size={18} />

@@ -174,6 +174,10 @@ RESEND_API_KEY = os.environ.get('RESEND_API_KEY', os.environ.get('EMAIL_SERVICE_
 PAYSTACK_TEST_SECRET_KEY = os.environ.get('PAYSTACK_TEST_SECRET_KEY', '')
 PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', PAYSTACK_TEST_SECRET_KEY)
 PAYSTACK_WEBHOOK_SECRET = os.environ.get('PAYSTACK_WEBHOOK_SECRET', PAYSTACK_SECRET_KEY)
+DELIVERY_ORIGIN_LAT = float(os.environ.get('DELIVERY_ORIGIN_LAT', '8.4966'))
+DELIVERY_ORIGIN_LNG = float(os.environ.get('DELIVERY_ORIGIN_LNG', '4.5421'))
+DELIVERY_BASE_FEE = float(os.environ.get('DELIVERY_BASE_FEE', '500'))
+DELIVERY_RATE_PER_KM = float(os.environ.get('DELIVERY_RATE_PER_KM', '100'))
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'orders@zaddys.ng')
 APP_URL = os.environ.get('NEXT_PUBLIC_APP_URL', os.environ.get('APP_URL', 'http://localhost:3000'))
 E2E_TEST_MODE = os.environ.get('E2E_TEST_MODE', 'False').lower() == 'true' or os.environ.get('E2E_TEST_MODE') == '1'

@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Check, Clock, Package } from "lucide-react";
 import { getAccessToken } from "@/services/authService";
+import ZaddysLoader from "@/components/ZaddysLoader";
 
 type Tracking = { order_number: string; status: string; total_price: number | string; delivery_fee: number | string; is_paid: boolean };
 const statuses = ["Pending Confirmation", "Preparing", "Ready for Dispatch", "Dispatched", "Delivered"];
@@ -33,7 +34,7 @@ export default function TrackOrderPage() {
         <p className="section-label">Live order tracking</p>
         <h1 className="page-title mt-2">Order #{orderNumber}</h1>
         {error && <p className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</p>}
-        {!order && !error && <p className="mt-8 text-sm text-zaddys-gray">Loading your order status...</p>}
+        {!order && !error && <ZaddysLoader />}
         {order && (
           <>
             <div className="mt-6 rounded-2xl bg-zaddys-black p-5 text-white"><p className="text-xs text-zinc-400">Current status</p><p className="mt-1 text-xl font-bold">{order.status}</p><p className="mt-2 text-sm text-zinc-300">Total: ₦{Number(order.total_price).toLocaleString()}</p></div>
