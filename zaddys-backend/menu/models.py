@@ -49,7 +49,7 @@ class ProductOption(models.Model):
         return f"{self.name} (+₦{self.price_extra})"
 
 class CustomerProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     phone = models.CharField(max_length=20, blank=True, null=True)
     referral_code = models.CharField(max_length=50, blank=True, null=True)
     points = models.IntegerField(default=0)
@@ -190,7 +190,7 @@ class Order(models.Model):
         if not self.order_number:
             from django.utils import timezone
             prefix = timezone.localdate().strftime('ZD-%Y%m%d')
-            last_order = Order.objects.filter(order_number__startswith=prefix).order_by('-id').first()
+            last_order = Order.objects.select_for_update().filter(order_number__startswith=prefix).order_by('-id').first()
             sequence = int(last_order.order_number.rsplit('-', 1)[-1]) + 1 if last_order else 1
             self.order_number = f'{prefix}-{sequence:04d}'
         super().save(*args, **kwargs)
@@ -203,7 +203,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
     quantity = models.IntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     selected_options = models.TextField(blank=True, null=True) # Summary of options chosen

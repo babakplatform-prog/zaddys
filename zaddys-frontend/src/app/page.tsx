@@ -134,6 +134,8 @@ export default function HomePage() {
       {/* Header Section */}
       <div className="relative z-10 border-b border-zinc-100 bg-white px-5 pb-6 pt-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
         <div className="mb-8 flex items-center justify-between">
+          <div className="invisible w-[35px]" />
+          <Image src="/zaddys-logo.PNG" alt="Zaddy's Creamery and Grills" width={120} height={54} className="h-10 w-auto object-contain" priority />
           <Link href="/cart" aria-label="Open cart" className="relative rounded-full bg-zaddys-surface p-2 text-zaddys-ink">
             <ShoppingBag size={19} />
           </Link>

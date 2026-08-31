@@ -175,7 +175,7 @@ export default function LoginPage() {
                   onClick={() => handleSocialAuth('apple')} 
                   className="flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] bg-white text-black hover:bg-zinc-100 transition"
                 >
-                  <Apple size={20} className="fill-white text-white" />
+                  <Apple size={20} className="fill-black text-black" />
                   <span className="font-semibold text-black text-[11px]">Continue with Apple</span>
                 </button>
               </div>

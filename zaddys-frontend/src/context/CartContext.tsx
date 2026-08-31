@@ -1,8 +1,14 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Define what a Cart Item looks like
+// Generate a unique cart item key from product ID + selected options
+function generateCartItemId(productId: number, selectedOptionIds?: number[]): string {
+  const optionKey = (selectedOptionIds || []).sort((a, b) => a - b).join(',');
+  return `${productId}:${optionKey}`;
+}
+
 export interface CartItem {
+  cartItemId: string;
   id: number;
   name: string;
   price: number;
@@ -14,9 +20,9 @@ export interface CartItem {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: CartItem) => void;
-  updateQuantity: (id: number, quantity: number) => void;
-  removeFromCart: (id: number) => void;
+  addToCart: (item: Omit<CartItem, 'cartItemId'>) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
+  removeFromCart: (cartItemId: string) => void;
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
@@ -44,28 +50,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("zaddys_cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (newItem: CartItem) => {
+  const addToCart = (newItem: Omit<CartItem, 'cartItemId'>) => {
+    const cartItemId = generateCartItemId(newItem.id, newItem.selected_option_ids);
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === newItem.id && JSON.stringify(item.selected_option_ids || []) === JSON.stringify(newItem.selected_option_ids || []));
+      const existing = prev.find((item) => item.cartItemId === cartItemId);
       if (existing) {
         return prev.map((item) =>
-          item.id === newItem.id ? { ...item, quantity: item.quantity + newItem.quantity } : item
+          item.cartItemId === cartItemId ? { ...item, quantity: item.quantity + newItem.quantity } : item
         );
       }
-      return [...prev, newItem];
+      return [...prev, { ...newItem, cartItemId }];
     });
   };
 
-  const removeFromCart = (id: number) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const removeFromCart = (cartItemId: string) => {
+    setCart((prev) => prev.filter((item) => item.cartItemId !== cartItemId));
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (cartItemId: string, quantity: number) => {
     if (quantity < 1) {
-      removeFromCart(id);
+      removeFromCart(cartItemId);
       return;
     }
-    setCart((prev) => prev.map((item) => item.id === id ? { ...item, quantity } : item));
+    setCart((prev) => prev.map((item) => item.cartItemId === cartItemId ? { ...item, quantity } : item));
   };
 
   const clearCart = () => setCart([]);

@@ -1,4 +1,5 @@
 import random
+import secrets
 from datetime import timedelta
 from django.utils import timezone
 from rest_framework import status, views
@@ -37,7 +38,7 @@ def send_otp_email(user_email, otp_code, user_name='there'):
         print("OTP Email Error:", e)
 
 def issue_otp(profile):
-    otp = str(random.randint(100000, 999999))
+    otp = str(secrets.randbelow(900000) + 100000)
     profile.otp_code = otp
     profile.otp_expires_at = timezone.now() + timedelta(minutes=10)
     profile.otp_attempts = 0
@@ -148,3 +149,47 @@ class VerifyOTPView(views.APIView):
                 return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class SocialLoginView(views.APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        name = request.data.get('name', '')
+        # Simple shared secret to authenticate the Next.js backend calling this
+        secret = request.data.get('secret')
+        
+        if secret != getattr(settings, 'SECRET_KEY', ''):
+            return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
+            
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user = User.objects.filter(email=email).first()
+        if not user:
+            import random
+            username = email.split('@')[0]
+            if User.objects.filter(username=username).exists():
+                username = f"{username}-{random.randint(1000, 9999)}"
+            user = User.objects.create_user(username=username, email=email)
+            parts = name.split(' ', 1)
+            user.first_name = parts[0]
+            if len(parts) > 1:
+                user.last_name = parts[1]
+            user.save()
+            
+            CustomerProfile.objects.create(user=user, is_verified=True)
+        else:
+            profile, _ = CustomerProfile.objects.get_or_create(user=user)
+            if not profile.is_verified:
+                profile.is_verified = True
+                profile.save(update_fields=['is_verified'])
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": {
+                "id": user.id,
+                "name": user.get_full_name() or user.username,
+                "email": user.email,
+            },
+        }, status=status.HTTP_200_OK)

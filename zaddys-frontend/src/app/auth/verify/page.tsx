@@ -104,7 +104,9 @@ export default function VerifyOTP() {
               ref={(el) => {
                 inputRefs.current[index] = el;
               }}
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]"
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}

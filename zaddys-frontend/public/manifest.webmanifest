@@ -7,7 +7,7 @@
   "background_color": "#121212",
   "theme_color": "#C91414",
   "icons": [{
-    "src": "/zaddys-logo.jpg",
+    "src": "/zaddys-logo.PNG",
     "sizes": "512x512",
     "type": "image/jpeg",
     "purpose": "any maskable"

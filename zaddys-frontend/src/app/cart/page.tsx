@@ -35,6 +35,8 @@ export default function CartPage() {
   const [hasToken] = useState(() => Boolean(getAccessToken()));
   const [profileLoading, setProfileLoading] = useState(() => hasToken);
   const [zonesError, setZonesError] = useState("");
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZoneType[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
   const paystackScriptPromise = useRef<Promise<void> | null>(null);
   const paymentSequence = useRef(0);
   const paymentId = useId().replace(/:/g, "");
@@ -65,13 +67,15 @@ export default function CartPage() {
     const token = getAccessToken();
     Promise.all([
       token ? fetch(`${apiUrl}/profile/`, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.ok ? res.json() as Promise<Profile> : null) : Promise.resolve(null),
+      fetch(`${apiUrl}/delivery-zones/`).then((res) => res.ok ? res.json() : []),
     ])
-      .then(([profile]) => {
+      .then(([profile, zones]) => {
         if (profile) {
           setCustomerName(profile.name);
           setEmail(profile.email);
           setPhone(profile.phone || "");
         }
+        if (Array.isArray(zones)) setDeliveryZones(zones);
       })
       .catch(() => {
         setZonesError("We could not load your account details.");
@@ -103,6 +107,7 @@ export default function CartPage() {
           delivery_notes: deliveryNotes,
           delivery_latitude: deliveryCoordinates?.lat,
           delivery_longitude: deliveryCoordinates?.lng,
+          delivery_zone_id: selectedZoneId,
           coupon_code: couponCode,
           transaction_ref: reference.reference
         }),
@@ -178,8 +183,11 @@ export default function CartPage() {
       return;
     }
     if (profileLoading) return alert("Your checkout details are still loading. Please wait a moment.");
-    if (!customerName || !email || !phone || !deliveryAddress || !landmark || !deliveryCoordinates || deliveryFee <= 0) {
+    if (!customerName || !email || !phone || !deliveryAddress || !landmark) {
       return alert("Please fill all required delivery details.");
+    }
+    if (!deliveryCoordinates && !selectedZoneId) {
+      return alert("Please select a delivery zone or use an address with location.");
     }
     
     setIsProcessing(true);
@@ -212,7 +220,7 @@ export default function CartPage() {
         <h2 className="font-bold text-zaddys-red mb-3 text-sm uppercase tracking-wider">Order Summary</h2>
         <div className="overflow-hidden rounded-3xl border border-zaddys-border bg-white shadow-sm mb-6">
           {cart.map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-3 border-b border-zaddys-border p-4 last:border-b-0">
+            <div key={item.cartItemId} className="flex items-center justify-between gap-3 border-b border-zaddys-border p-4 last:border-b-0">
               <div className="flex items-center space-x-3">
                 <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-zinc-100">
                   {item.image && (
@@ -229,14 +237,14 @@ export default function CartPage() {
                 <div>
                   <h3 className="font-bold text-sm leading-5 text-zaddys-red">{item.name}</h3>
                   <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-zaddys-red transition-transform active:scale-90"><Minus size={12} /></button>
+                    <button type="button" onClick={() => updateQuantity(item.cartItemId, item.quantity - 1)} aria-label={`Decrease ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-zaddys-red transition-transform active:scale-90"><Minus size={12} /></button>
                     <span>{item.quantity}</span>
-                    <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Increase ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-zaddys-red transition-transform active:scale-90"><Plus size={12} /></button>
+                    <button type="button" onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)} aria-label={`Increase ${item.name} quantity`} className="p-1 rounded-full bg-zinc-100 text-zaddys-red transition-transform active:scale-90"><Plus size={12} /></button>
                   </div>
                   <p className="text-sm font-black text-red-600">₦{(item.price * item.quantity).toLocaleString()}</p>
                 </div>
               </div>
-              <button aria-label={`Remove ${item.name}`} onClick={() => removeFromCart(item.id)} className="rounded-xl p-2 text-zinc-400 transition hover:bg-red-50 hover:text-red-600">
+              <button aria-label={`Remove ${item.name}`} onClick={() => removeFromCart(item.cartItemId)} className="rounded-xl p-2 text-zinc-400 transition hover:bg-red-50 hover:text-red-600">
                 <Trash2 size={18} />
               </button>
             </div>
@@ -297,6 +305,29 @@ export default function CartPage() {
               />
             )}
           </div>
+          {deliveryZones.length > 0 && !deliveryCoordinates && (
+            <div>
+              <label className="text-xs font-semibold text-zaddys-gray uppercase tracking-wide">Delivery Zone</label>
+              <select
+                required={!deliveryCoordinates}
+                value={selectedZoneId ?? ""}
+                onChange={(e) => {
+                  const zoneId = Number(e.target.value);
+                  const zone = deliveryZones.find((z) => z.id === zoneId);
+                  setSelectedZoneId(zoneId || null);
+                  setDeliveryFee(zone ? Number(zone.fee) : 0);
+                }}
+                className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red focus:outline-none focus:border-red-600 shadow-sm"
+              >
+                <option value="">Select your area</option>
+                {deliveryZones.map((zone) => (
+                  <option key={zone.id} value={zone.id}>
+                    {zone.name} — ₦{Number(zone.fee).toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <input type="text" required value={landmark} onChange={(e) => setLandmark(e.target.value)} placeholder="Nearest Landmark" className="w-full bg-white border border-zinc-200 rounded-2xl px-4 py-3 text-zaddys-red placeholder-zinc-400 focus:outline-none focus:border-red-600 shadow-sm" />
           {deliveryFee > 0 && <p className="text-xs font-semibold text-zaddys-red">Delivery calculated from {distanceKm?.toFixed(1)} km away.</p>}
           {zonesError && <p className="text-xs font-semibold text-zaddys-red">{zonesError}</p>}
@@ -339,4 +370,5 @@ export default function CartPage() {
 
 type PaystackReference = { reference: string };
 type Profile = { name: string; email: string; phone?: string };
+type DeliveryZoneType = { id: number; name: string; fee: string };
 

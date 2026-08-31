@@ -52,8 +52,8 @@ body {
 .dark .app-content,
 .dark .app-frame,
 .dark .brand-entry {
-  background-color: #ffffff !important;
-  color: var(--z-red) !important;
+  background-color: #121212 !important;
+  color: #f5f5f5 !important;
 }
 
 .dark .theme-toggle {
@@ -67,14 +67,6 @@ input,
 textarea,
 select {
   font: inherit;
-}
-
-.text-black {
-  color: var(--z-red) !important;
-}
-
-.hover\\:text-black:hover {
-  color: var(--z-red) !important;
 }
 
 @layer components {

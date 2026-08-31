@@ -78,10 +78,19 @@ class CreateOrderView(views.APIView):
 
             products = []
             total = Decimal('0')
-            try:
-                delivery_fee, _ = distance_based_delivery_fee(data['delivery_latitude'], data['delivery_longitude'])
-            except (KeyError, TypeError, ValueError):
-                return Response({'error': 'A valid delivery location is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            delivery_zone_id = data.get('delivery_zone_id')
+            delivery_zone = None
+            if delivery_zone_id:
+                try:
+                    delivery_zone = DeliveryZone.objects.get(id=delivery_zone_id, is_active=True)
+                    delivery_fee = float(delivery_zone.fee)
+                except DeliveryZone.DoesNotExist:
+                    return Response({'error': 'Selected delivery zone is not available.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                try:
+                    delivery_fee, _ = distance_based_delivery_fee(data['delivery_latitude'], data['delivery_longitude'])
+                except (KeyError, TypeError, ValueError):
+                    return Response({'error': 'A valid delivery location is required.'}, status=status.HTTP_400_BAD_REQUEST)
             for item in cart_items:
                 product = Product.objects.get(id=item['id'])
                 quantity = int(item['quantity'])
@@ -106,7 +115,7 @@ class CreateOrderView(views.APIView):
                 discount = min(discount, total)
                 total -= discount
             expected_amount = int(total * 100)
-            if payment.get('amount') != expected_amount or payment.get('customer', {}).get('email') != data.get('email'):
+            if payment.get('amount') != expected_amount or payment.get('customer', {}).get('email', '').lower() != data.get('email', '').lower():
                 return Response({'error': 'Payment amount or customer does not match this order.'}, status=status.HTTP_400_BAD_REQUEST)
 
             with transaction.atomic():
@@ -120,7 +129,7 @@ class CreateOrderView(views.APIView):
                     city=data.get('city'),
                     delivery_notes=data.get('delivery_notes', ''),
                     preferred_delivery_time=data.get('preferred_delivery_time'),
-                    delivery_zone=None,
+                    delivery_zone=delivery_zone,
                     delivery_fee=delivery_fee,
                     coupon_code=coupon.code if coupon else '',
                     discount_amount=discount,
@@ -143,7 +152,7 @@ class CreateOrderView(views.APIView):
                     profile.save(update_fields=['points'])
                     LoyaltyTransaction.objects.create(profile=profile, points_delta=points, reason=f'Order {order.order_number}')
 
-                    send_order_confirmation_email(order.email, order.customer_name or request.user.username, order.order_number, order.total_price)
+                send_order_confirmation_email(order.email, order.customer_name or request.user.username, order.order_number, order.total_price)
 
             return Response({
                 'message': 'Order created securely!',
