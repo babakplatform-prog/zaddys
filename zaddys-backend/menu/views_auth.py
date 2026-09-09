@@ -177,7 +177,7 @@ class SocialLoginView(views.APIView):
                 username = f"{username}-{random.randint(1000, 9999)}"
             user = User.objects.create_user(username=username, email=email)
             parts = name.strip().split(' ', 1)
-            user.first_name = parts[0]
+            user.first_name = parts[0] if parts else ''
             if len(parts) > 1:
                 user.last_name = parts[1]
             user.save()
