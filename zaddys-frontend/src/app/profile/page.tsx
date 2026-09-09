@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAccessToken } from "@/services/authService";
 import ZaddysLoader from "@/components/ZaddysLoader";
+import { signOut as signOutNextAuth } from "next-auth/react";
 
 type Order = { id: number; order_number?: string; total_price: number | string; status: string };
 type Profile = { name: string; email: string; phone?: string; referral_code?: string; points: number; orders: Order[] };
@@ -33,9 +34,10 @@ export default function ProfileDashboard() {
       });
   }, [router]);
 
-  const signOut = () => {
+  const signOut = async () => {
     localStorage.removeItem("zaddys_access_token");
     localStorage.removeItem("zaddys_refresh_token");
+    await signOutNextAuth({ redirect: false });
     router.push("/");
   };
 
@@ -52,6 +54,7 @@ export default function ProfileDashboard() {
     }
     localStorage.removeItem("zaddys_access_token");
     localStorage.removeItem("zaddys_refresh_token");
+    await signOutNextAuth({ redirect: false });
     router.push("/");
   };
 

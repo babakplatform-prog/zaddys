@@ -7,7 +7,7 @@ function SessionSync() {
   const { data: session } = useSession();
   
   useEffect(() => {
-    const token = (session as any)?.djangoAccessToken;
+    const token = session?.djangoAccessToken;
     if (token) {
       localStorage.setItem("zaddys_access_token", token);
     }

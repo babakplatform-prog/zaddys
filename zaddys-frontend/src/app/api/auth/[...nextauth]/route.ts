@@ -2,15 +2,21 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
 
+const requiredEnv = (name: string) => {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required authentication environment variable: ${name}`);
+  return value;
+};
+
 const handler = NextAuth({
   providers: [
     GoogleProvider({
-      clientId: (process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: requiredEnv("GOOGLE_CLIENT_ID"),
+      clientSecret: requiredEnv("GOOGLE_CLIENT_SECRET"),
     }),
     AppleProvider({
-      clientId: (process.env.APPLE_ID || process.env.APPLE_CLIENT_ID) as string,
-      clientSecret: process.env.APPLE_SECRET as string,
+      clientId: requiredEnv("APPLE_ID"),
+      clientSecret: requiredEnv("APPLE_SECRET"),
     }),
   ],
   pages: {
@@ -28,23 +34,27 @@ const handler = NextAuth({
               email: user.email,
               name: user.name,
               provider: account.provider,
-              secret: process.env.NEXTAUTH_SECRET || "local-dev-key-for-migrations-only" 
+              secret: requiredEnv("SOCIAL_LOGIN_SECRET"),
             }),
           });
           
-          if (res.ok) {
-            const data = await res.json();
-            token.djangoAccessToken = data.access;
+          if (!res.ok) {
+            const details = await res.text();
+            throw new Error(`Social account provisioning failed (${res.status}): ${details}`);
           }
+          const data = await res.json() as { access?: string };
+          if (!data.access) throw new Error("Social account provisioning returned no access token");
+          token.djangoAccessToken = data.access;
         } catch (error) {
           console.error("Social login sync error:", error);
+          throw error;
         }
       }
       return token;
     },
     async session({ session, token }) {
       if (token?.djangoAccessToken) {
-        (session as any).djangoAccessToken = token.djangoAccessToken;
+        session.djangoAccessToken = token.djangoAccessToken;
       }
       return session;
     }

@@ -12,6 +12,7 @@ NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_replace_me
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIza_replace_me
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=replace_with_a_long_random_secret
+SOCIAL_LOGIN_SECRET=replace_with_a_dedicated_social_login_secret
 GOOGLE_CLIENT_ID=replace_me
 GOOGLE_CLIENT_SECRET=replace_me
 APPLE_ID=replace_me
@@ -46,7 +47,7 @@ The menu seed is intentionally non-destructive: it will not overwrite an existin
 SECRET_KEY=replace_with_a_long_random_django_secret
 DEBUG=False
 ALLOWED_HOSTS=api.zaddys.ng
-CORS_ALLOWED_ORIGINS=https://www.zaddys.ng,https://your-project.vercel.app
+CORS_ALLOWED_ORIGINS=https://www.zaddys.ng
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
 PAYSTACK_TEST_SECRET_KEY=sk_test_replace_me
 PAYSTACK_WEBHOOK_SECRET=whsec_replace_me
@@ -133,17 +134,17 @@ Create a Web Service from the same repository with:
 - **Start Command:** `gunicorn core.wsgi:application --bind 0.0.0.0:$PORT`
 - **Health Check Path:** `/`
 
-Add the backend variables from `zaddys-backend/.env.example`. Create a Render PostgreSQL database first and paste its **Internal Database URL** into `DATABASE_URL`. Set `ALLOWED_HOSTS` to the Render API hostname and `CORS_ALLOWED_ORIGINS` to the exact Vercel URL, comma-separated with any custom frontend domain.
+Add the backend variables from `zaddys-backend/.env.example`. Create a Render PostgreSQL database first and paste its **Internal Database URL** into `DATABASE_URL`. Set `ALLOWED_HOSTS` to the Render API hostname and `CORS_ALLOWED_ORIGINS` to the canonical custom frontend origin.
 
 ## Connect the deployments
 
 1. Deploy Render and copy its service URL, for example `https://zaddys-api.onrender.com`.
 2. Set Vercel `NEXT_PUBLIC_API_URL` to `https://zaddys-api.onrender.com/api`.
-3. Set Render `CORS_ALLOWED_ORIGINS` to the exact Vercel URL, for example `https://zaddys.vercel.app`.
+3. Set Render `CORS_ALLOWED_ORIGINS` to `https://www.zaddys.ng`.
 4. Redeploy both services after saving variables.
 5. Open `https://zaddys-api.onrender.com/api/products/` and confirm it returns menu data.
-6. Test signup, login, checkout, and support from the Vercel URL.
+6. Test signup, login, checkout, social login, and account deletion from `https://www.zaddys.ng`.
 
-For the custom frontend domain, set `NEXTAUTH_URL` to the exact HTTPS domain, update every OAuth callback URL to that domain, and add the same domain to Render `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS`.
+For production, set `NEXTAUTH_URL=https://www.zaddys.ng` (or the one confirmed canonical custom host) in Vercel, set the same `SOCIAL_LOGIN_SECRET` in Vercel and Render, update every OAuth callback URL to `https://www.zaddys.ng/api/auth/callback/{provider}`, and add `https://www.zaddys.ng` to Render `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS`. Redirect the apex domain to this canonical host so OAuth never switches origins.
 
 Use matching Paystack modes: `pk_test_` with `sk_test_`, or `pk_live_` with `sk_live_`. Never put `PAYSTACK_SECRET_KEY`, `RESEND_API_KEY`, database credentials, or OAuth client secrets in Vercel `NEXT_PUBLIC_*` variables.

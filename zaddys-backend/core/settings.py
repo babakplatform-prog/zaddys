@@ -182,6 +182,7 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'orders@zaddys.ng')
 APP_URL = os.environ.get('NEXT_PUBLIC_APP_URL', os.environ.get('APP_URL', 'http://localhost:3000'))
 E2E_TEST_MODE = os.environ.get('E2E_TEST_MODE', 'False').lower() == 'true' or os.environ.get('E2E_TEST_MODE') == '1'
 RESEND_WEBHOOK_SECRET = os.environ.get('RESEND_WEBHOOK_SECRET', '')
+SOCIAL_LOGIN_SECRET = os.environ.get('SOCIAL_LOGIN_SECRET', '')
 
 secure_default = 'False' if DEBUG else 'True'
 SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', secure_default).lower() == 'true'
@@ -191,6 +192,5 @@ SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0' if DEBUG els
 SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
 SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 
 

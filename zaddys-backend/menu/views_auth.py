@@ -52,6 +52,7 @@ class RegisterView(views.APIView):
         password = request.data.get('password')
         phone = request.data.get('phone', '')
         referral_code = request.data.get('referralCode', '').strip()
+        full_name = request.data.get('fullName', '').strip()
 
         if not email or not password:
             return Response({"error": "Email and password required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -62,6 +63,10 @@ class RegisterView(views.APIView):
         if User.objects.filter(username=login_username).exists():
             login_username = f'{login_username}-{random.randint(1000, 9999)}'
         user = User.objects.create_user(username=login_username, email=email, password=password)
+        name_parts = full_name.split(' ', 1)
+        user.first_name = name_parts[0] if name_parts else ''
+        user.last_name = name_parts[1] if len(name_parts) > 1 else ''
+        user.save(update_fields=['first_name', 'last_name'])
         profile = CustomerProfile.objects.create(user=user, phone=phone, is_verified=False)
 
         issue_otp(profile)
@@ -157,7 +162,8 @@ class SocialLoginView(views.APIView):
         # Simple shared secret to authenticate the Next.js backend calling this
         secret = request.data.get('secret')
         
-        if secret != getattr(settings, 'SECRET_KEY', ''):
+        expected_secret = getattr(settings, 'SOCIAL_LOGIN_SECRET', '')
+        if not expected_secret or secret != expected_secret:
             return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
             
         if not email:
@@ -170,7 +176,7 @@ class SocialLoginView(views.APIView):
             if User.objects.filter(username=username).exists():
                 username = f"{username}-{random.randint(1000, 9999)}"
             user = User.objects.create_user(username=username, email=email)
-            parts = name.split(' ', 1)
+            parts = name.strip().split(' ', 1)
             user.first_name = parts[0]
             if len(parts) > 1:
                 user.last_name = parts[1]
@@ -179,6 +185,11 @@ class SocialLoginView(views.APIView):
             CustomerProfile.objects.create(user=user, is_verified=True)
         else:
             profile, _ = CustomerProfile.objects.get_or_create(user=user)
+            if name and not user.get_full_name():
+                parts = name.strip().split(' ', 1)
+                user.first_name = parts[0]
+                user.last_name = parts[1] if len(parts) > 1 else ''
+                user.save(update_fields=['first_name', 'last_name'])
             if not profile.is_verified:
                 profile.is_verified = True
                 profile.save(update_fields=['is_verified'])

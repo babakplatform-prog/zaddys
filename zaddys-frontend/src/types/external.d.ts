@@ -8,6 +8,18 @@ declare namespace NodeJS {
   }
 }
 
+declare module "next-auth" {
+  interface Session {
+    djangoAccessToken?: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    djangoAccessToken?: string;
+  }
+}
+
 declare module "lucide-react" {
   import type { ComponentType, SVGProps } from "react";
 

@@ -59,6 +59,7 @@ export default function SignupPage() {
         password: formData.password,
         phone: formData.phone,
         referralCode: formData.referralCode,
+        fullName: formData.fullName,
       });
       sessionStorage.setItem("zaddys_pending_email", data.email || formData.email);
       router.push("/auth/verify");

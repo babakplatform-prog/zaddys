@@ -56,6 +56,45 @@ class AccountDeletionTests(TestCase):
 		self.assertIsNone(order.user)
 
 
+class SocialLoginTests(TestCase):
+	def setUp(self):
+		self.client = APIClient()
+		self.secret = 'social-login-secret'
+		self.settings = patch('menu.views_auth.settings.SOCIAL_LOGIN_SECRET', self.secret)
+		self.settings.start()
+		self.addCleanup(self.settings.stop)
+
+	def test_new_social_user_is_provisioned_with_name_and_verified_profile(self):
+		response = self.client.post('/api/auth/social-login/', {
+			'email': 'new-user@example.com',
+			'name': 'New User',
+			'provider': 'google',
+			'secret': self.secret,
+		}, format='json')
+
+		self.assertEqual(response.status_code, 200)
+		user = User.objects.get(email='new-user@example.com')
+		self.assertEqual(user.get_full_name(), 'New User')
+		self.assertTrue(user.profile.is_verified)
+		self.assertTrue(response.data['access'])
+
+	def test_existing_social_user_receives_tokens_and_missing_name_is_filled(self):
+		user = User.objects.create_user(username='existing', email='existing@example.com')
+		CustomerProfile.objects.create(user=user)
+
+		response = self.client.post('/api/auth/social-login/', {
+			'email': user.email,
+			'name': 'Existing User',
+			'provider': 'google',
+			'secret': self.secret,
+		}, format='json')
+
+		self.assertEqual(response.status_code, 200)
+		user.refresh_from_db()
+		self.assertEqual(user.get_full_name(), 'Existing User')
+		self.assertTrue(response.data['access'])
+
+
 class PaystackWebhookTests(TestCase):
 	def setUp(self):
 		self.client = APIClient()

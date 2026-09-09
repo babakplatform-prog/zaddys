@@ -4,7 +4,6 @@ import "./globals.css"; // THIS LINE FIXES THE PLAIN TEXT!
 import Providers from "@/components/Providers";
 import DockNav from "@/components/DockNav"; // BRINGS BACK THE DOCK
 import ThemeToggle from "@/components/ThemeToggle";
-import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"] });
 
