@@ -11,12 +11,12 @@ const requiredEnv = (name: string) => {
 const handler = NextAuth({
   providers: [
     GoogleProvider({
-      clientId: requiredEnv("GOOGLE_CLIENT_ID"),
-      clientSecret: requiredEnv("GOOGLE_CLIENT_SECRET"),
+      clientId: process.env.GOOGLE_CLIENT_ID || "missing-google-client-id",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "missing-google-client-secret",
     }),
     AppleProvider({
-      clientId: requiredEnv("APPLE_ID"),
-      clientSecret: requiredEnv("APPLE_SECRET"),
+      clientId: process.env.APPLE_ID || "missing-apple-id",
+      clientSecret: process.env.APPLE_SECRET || "missing-apple-secret",
     }),
   ],
   pages: {

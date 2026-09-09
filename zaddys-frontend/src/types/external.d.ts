@@ -1,3 +1,6 @@
+import "next-auth";
+import "next-auth/jwt";
+
 declare namespace NodeJS {
   interface ProcessEnv {
     [key: string]: string | undefined;
