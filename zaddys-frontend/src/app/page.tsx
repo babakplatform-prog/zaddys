@@ -40,7 +40,7 @@ export default function HomePage() {
     // Splash screen timer (1.8 - 2 seconds as per brand design brief)
     const splashTimer = setTimeout(() => setShowSplash(false), 2000); 
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://zaddys.onrender.com/api";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://zaddys-api.onrender.com/api";
     
     const token = getAccessToken();
     const profileRequest = token

@@ -28,7 +28,7 @@ OAuth callback URLs for this NextAuth app:
 
 Register both local and production URLs in each provider console. The client IDs and secrets are read server-side by the NextAuth route; the `NEXT_PUBLIC_*` Google client ID alias is supported for compatibility, but the server-only `GOOGLE_CLIENT_ID` is preferred.
 
-For production, set `NEXT_PUBLIC_API_URL` to the deployed Django API URL and `NEXTAUTH_URL` to the deployed frontend URL. `NEXT_PUBLIC_*` values are exposed to the browser. OAuth client secrets are server-side NextAuth secrets and must not be exposed through `NEXT_PUBLIC_*` names.
+For production, set `NEXT_PUBLIC_API_URL=https://zaddys-api.onrender.com/api` and `NEXTAUTH_URL=https://www.zaddys.ng`. Do not set `NEXTAUTH_URL` to a Vercel deployment URL for the production environment. `NEXT_PUBLIC_*` values are exposed to the browser. OAuth client secrets are server-side NextAuth secrets and must not be exposed through `NEXT_PUBLIC_*` names.
 
 ## Backend: `zaddys-backend/.env` and Django deployment
 
@@ -112,7 +112,7 @@ Create a new project from this repository with:
 - **Install Command:** `npm install` (default)
 - **Output Directory:** leave the default blank
 
-Add all variables from `zaddys-frontend/.env.example` to the Vercel Production environment, then redeploy. At minimum, replace `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`.
+Add all variables from `zaddys-frontend/.env.example` to the Vercel Production environment, then redeploy. At minimum, set the **Production** environment values to `NEXT_PUBLIC_API_URL=https://zaddys-api.onrender.com/api`, `NEXTAUTH_URL=https://www.zaddys.ng`, and a generated `NEXTAUTH_SECRET`, then redeploy. Preview values may use a Vercel URL only if that URL is also registered with Google OAuth.
 
 ## Django Admin
 
