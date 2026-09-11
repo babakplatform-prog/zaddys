@@ -3,12 +3,14 @@ import hmac
 import json
 import base64
 import time
+from datetime import timedelta
 import tempfile
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase, override_settings
+from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework.request import Request
 
@@ -94,6 +96,53 @@ class SocialLoginTests(TestCase):
 		self.assertEqual(user.get_full_name(), 'Existing User')
 		self.assertTrue(response.data['access'])
 
+
+class PasswordResetTests(TestCase):
+	def setUp(self):
+		self.client = APIClient()
+		self.user = User.objects.create_user(
+			username='reset-user',
+			email='reset@example.com',
+			password='old-password-123',
+		)
+		self.profile = CustomerProfile.objects.create(user=self.user)
+
+	@patch('menu.views_auth.send_password_reset_email')
+	def test_request_and_use_password_reset_token_once(self, send_email):
+		response = self.client.post('/api/auth/forgot-password/', {'email': self.user.email}, format='json')
+
+		self.assertEqual(response.status_code, 200)
+		send_email.assert_called_once()
+		self.profile.refresh_from_db()
+		token = self.profile.password_reset_token
+		response = self.client.post('/api/auth/reset-password/', {
+			'token': token,
+			'password': 'new-password-123',
+		}, format='json')
+
+		self.assertEqual(response.status_code, 200)
+		self.user.refresh_from_db()
+		self.assertTrue(self.user.check_password('new-password-123'))
+		self.profile.refresh_from_db()
+		self.assertIsNone(self.profile.password_reset_token)
+
+		response = self.client.post('/api/auth/reset-password/', {
+			'token': token,
+			'password': 'another-password-123',
+		}, format='json')
+		self.assertEqual(response.status_code, 400)
+
+	def test_expired_password_reset_token_is_rejected(self):
+		self.profile.password_reset_token = 'expired-token'
+		self.profile.password_reset_expires_at = timezone.now() - timedelta(minutes=1)
+		self.profile.save(update_fields=['password_reset_token', 'password_reset_expires_at'])
+
+		response = self.client.post('/api/auth/reset-password/', {
+			'token': 'expired-token',
+			'password': 'new-password-123',
+		}, format='json')
+
+		self.assertEqual(response.status_code, 400)
 
 class PaystackWebhookTests(TestCase):
 	def setUp(self):
