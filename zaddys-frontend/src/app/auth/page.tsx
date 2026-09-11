@@ -23,11 +23,11 @@ export default function AuthPage() {
   }, []);
 
   const handleSocialAuth = (provider: "google" | "apple") => {
-    signIn(provider, { callbackUrl: sessionStorage.getItem("zaddys_auth_return") || "/" });
+    signIn(provider, { callbackUrl: "/auth/complete" });
   };
 
   return (
-    <main className="relative flex min-h-[100dvh] w-full flex-col justify-end bg-[#0D0D0D] font-sans">
+    <main className="relative flex min-h-[100dvh] w-full flex-col justify-end bg-[#0D0D0D] pb-28 font-sans">
       
       {/* 1. Dynamic Background Carousel (z-0) */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#0D0D0D]">

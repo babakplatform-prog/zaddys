@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <div className="app-content min-h-screen">
+          <div className="app-content min-h-screen pb-28">
             <ThemeToggle />
             {children}
             <DockNav />

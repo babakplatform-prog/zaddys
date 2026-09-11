@@ -15,7 +15,7 @@ export default function DockNav() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav aria-label="Primary navigation" className="fixed bottom-4 left-1/2 z-50 flex w-[calc(100%-1rem)] max-w-lg -translate-x-1/2 items-center justify-around rounded-2xl border border-zinc-700 bg-zaddys-black px-3 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2.5 text-white shadow-2xl">
+    <nav aria-label="Primary navigation" className="fixed bottom-3 left-1/2 z-50 flex w-[calc(100%-1.5rem)] max-w-lg -translate-x-1/2 items-center justify-around rounded-full border border-zinc-700/80 bg-zaddys-black/95 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2 text-white shadow-2xl backdrop-blur-md">
       
       {/* Home */}
       <Link href="/" className={`flex flex-col items-center space-y-1 transition ${isActive("/") ? "text-white" : "text-zinc-500 hover:text-zinc-300"}`}>

@@ -27,24 +27,32 @@ const handler = NextAuth({
       if (account && user) {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
-          const res = await fetch(`${apiUrl}/auth/social-login/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: user.email,
-              name: user.name,
-              provider: account.provider,
-              secret: requiredEnv("SOCIAL_LOGIN_SECRET"),
-            }),
+          const payload = JSON.stringify({
+            email: user.email,
+            name: user.name,
+            provider: account.provider,
+            secret: requiredEnv("SOCIAL_LOGIN_SECRET"),
           });
+          let res: Response | undefined;
+          for (let attempt = 0; attempt < 3; attempt += 1) {
+            res = await fetch(`${apiUrl}/auth/social-login/`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: payload,
+            });
+            if (![502, 503, 504].includes(res.status) || attempt === 2) break;
+            await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+          }
+          if (!res) throw new Error("Social account provisioning did not return a response");
           
           if (!res.ok) {
             const details = await res.text();
             throw new Error(`Social account provisioning failed (${res.status}): ${details}`);
           }
-          const data = await res.json() as { access?: string };
+          const data = await res.json() as { access?: string; refresh?: string };
           if (!data.access) throw new Error("Social account provisioning returned no access token");
           token.djangoAccessToken = data.access;
+          token.djangoRefreshToken = data.refresh;
         } catch (error) {
           console.error("Social login sync error:", error);
           throw error;
@@ -55,6 +63,7 @@ const handler = NextAuth({
     async session({ session, token }) {
       if (token?.djangoAccessToken) {
         session.djangoAccessToken = token.djangoAccessToken;
+        session.djangoRefreshToken = token.djangoRefreshToken;
       }
       return session;
     }

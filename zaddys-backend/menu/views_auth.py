@@ -45,6 +45,23 @@ def issue_otp(profile):
     profile.save(update_fields=['otp_code', 'otp_expires_at', 'otp_attempts'])
     send_otp_email(profile.user.email, otp, profile.user.get_full_name() or profile.user.username)
 
+def send_password_reset_email(user_email, user_name, token):
+    if settings.E2E_TEST_MODE:
+        return
+    resend.Emails.send({
+        "from": f"Zaddys Creamery & Grills <{settings.DEFAULT_FROM_EMAIL}>",
+        "to": [user_email],
+        "subject": "Reset your Zaddys password",
+        "html": f"""
+        <div style="max-width:600px;margin:auto;padding:40px;font-family:Arial,sans-serif">
+          <h1 style="color:#e31b23">ZADDYS</h1>
+          <p>Hi {user_name or 'there'},</p>
+          <p>Use the button below to reset your password. This link expires in 30 minutes.</p>
+          <p><a href="{settings.APP_URL}/forgot-password?token={token}" style="background:#e31b23;color:#fff;padding:14px 24px;border-radius:8px;text-decoration:none">Reset password</a></p>
+        </div>
+        """
+    })
+
 class RegisterView(views.APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -116,6 +133,40 @@ class ResendOTPView(views.APIView):
             return Response({"message": "A new verification code was sent.", "email": email}, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class ForgotPasswordView(views.APIView):
+    def post(self, request):
+        email = request.data.get('email', '').strip().lower()
+        if not email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            profile, _ = CustomerProfile.objects.get_or_create(user=user)
+            token = secrets.token_urlsafe(48)
+            profile.password_reset_token = token
+            profile.password_reset_expires_at = timezone.now() + timedelta(minutes=30)
+            profile.save(update_fields=['password_reset_token', 'password_reset_expires_at'])
+            send_password_reset_email(user.email, user.get_full_name() or user.username, token)
+        return Response({"message": "If an account exists for that email, a reset link has been sent."})
+
+class ResetPasswordView(views.APIView):
+    def post(self, request):
+        token = request.data.get('token', '')
+        password = request.data.get('password', '')
+        if not token or len(password) < 8:
+            return Response({"error": "A valid reset link and password of at least 8 characters are required."}, status=status.HTTP_400_BAD_REQUEST)
+        profile = CustomerProfile.objects.filter(
+            password_reset_token=token,
+            password_reset_expires_at__gt=timezone.now(),
+        ).select_related('user').first()
+        if not profile:
+            return Response({"error": "This reset link is invalid or expired."}, status=status.HTTP_400_BAD_REQUEST)
+        profile.user.set_password(password)
+        profile.user.save(update_fields=['password'])
+        profile.password_reset_token = None
+        profile.password_reset_expires_at = None
+        profile.save(update_fields=['password_reset_token', 'password_reset_expires_at'])
+        return Response({"message": "Password reset successful."})
 
 class VerifyOTPView(views.APIView):
     def post(self, request):

@@ -35,7 +35,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
 
   const handleSocialAuth = (provider: "google" | "apple") => {
-    signIn(provider, { callbackUrl: sessionStorage.getItem("zaddys_auth_return") || "/" });
+    signIn(provider, { callbackUrl: "/auth/complete" });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

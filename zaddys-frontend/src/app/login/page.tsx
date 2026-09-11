@@ -28,7 +28,7 @@ export default function LoginPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
   
   const handleSocialAuth = (provider: "google" | "apple") => {
-    signIn(provider, { callbackUrl: sessionStorage.getItem("zaddys_auth_return") || "/" });
+    signIn(provider, { callbackUrl: "/auth/complete" });
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -86,7 +86,7 @@ export default function LoginPage() {
   const labelStyles = "text-[11px] text-zinc-300 font-medium block mb-1.5";
 
   return (
-    <main className="min-h-[100dvh] bg-[#111111] px-2 py-5 font-sans flex flex-col mx-auto max-w-md w-full relative overflow-y-auto pb-safe">
+    <main className="min-h-[100dvh] bg-[#111111] px-2 py-5 pb-36 font-sans flex flex-col mx-auto max-w-md w-full relative overflow-y-auto">
       
       {/* Top Header & Close Button */}
       <div className="relative flex items-center justify-center mb-5 pt-1 min-h-10">
@@ -158,7 +158,7 @@ export default function LoginPage() {
                 disabled={loading} 
                 className="w-full bg-[#ff3b12] text-white font-semibold py-3 rounded-[0.65rem] hover:bg-red-700 transition flex justify-center items-center text-[12px]"
               >
-                {loading ? "Signing in..." : "Log in securely"}
+                {loading ? "Signing in..." : "Log in"}
               </button>
 
               <div className="grid grid-cols-1 gap-2">
@@ -179,6 +179,9 @@ export default function LoginPage() {
                   <span className="font-semibold text-black text-[11px]">Continue with Apple</span>
                 </button>
               </div>
+              <Link href="/forgot-password" className="text-center text-[11px] font-semibold text-zinc-300 hover:text-white hover:underline">
+                Forgot password?
+              </Link>
             </div>
             
             <div className="mt-3 pb-4 text-center text-[10px] text-zinc-400">

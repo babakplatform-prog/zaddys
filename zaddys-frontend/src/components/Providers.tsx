@@ -10,6 +10,9 @@ function SessionSync() {
     const token = session?.djangoAccessToken;
     if (token) {
       localStorage.setItem("zaddys_access_token", token);
+      if (session?.djangoRefreshToken) {
+        localStorage.setItem("zaddys_refresh_token", session.djangoRefreshToken);
+      }
     }
   }, [session]);
 

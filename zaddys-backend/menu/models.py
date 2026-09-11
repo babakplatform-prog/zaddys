@@ -57,6 +57,8 @@ class CustomerProfile(models.Model):
     otp_expires_at = models.DateTimeField(blank=True, null=True)
     otp_attempts = models.PositiveSmallIntegerField(default=0)
     is_verified = models.BooleanField(default=False)
+    password_reset_token = models.CharField(max_length=128, blank=True, null=True)
+    password_reset_expires_at = models.DateTimeField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.referral_code:

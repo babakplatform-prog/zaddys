@@ -80,7 +80,7 @@ For address suggestions, enable **Maps JavaScript API** and **Places API**, atta
 
 - Frontend uses `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` to open checkout.
 - Backend uses `PAYSTACK_SECRET_KEY` to verify the transaction.
-- Configure the Paystack webhook URL as `https://zaddys.onrender.com/api/webhooks/paystack/`.
+- Configure the Paystack webhook URL as `https://api.zaddys.ng/api/webhooks/paystack/`.
 - Paystack webhook requests are accepted only with a valid `x-paystack-signature`.
 
 ## Resend setup
