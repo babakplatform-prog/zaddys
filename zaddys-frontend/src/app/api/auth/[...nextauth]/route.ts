@@ -8,9 +8,8 @@ const requiredEnv = (name: string) => {
   return value;
 };
 
-const handler = NextAuth({
+const handler = (NextAuth as any)({
   secret: process.env.NEXTAUTH_SECRET,
-  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "missing-google-client-id",
@@ -25,7 +24,7 @@ const handler = NextAuth({
     signIn: '/auth',
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account }: any) {
       if (account && user) {
         try {
           const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://zaddys-api.onrender.com/api";
@@ -62,7 +61,7 @@ const handler = NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (token?.djangoAccessToken) {
         session.djangoAccessToken = token.djangoAccessToken;
         session.djangoRefreshToken = token.djangoRefreshToken;
