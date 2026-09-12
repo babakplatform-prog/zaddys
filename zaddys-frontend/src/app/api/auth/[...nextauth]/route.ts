@@ -9,6 +9,8 @@ const requiredEnv = (name: string) => {
 };
 
 const handler = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "missing-google-client-id",
@@ -26,7 +28,7 @@ const handler = NextAuth({
     async jwt({ token, user, account }) {
       if (account && user) {
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://zaddys-api.onrender.com/api";
           const payload = JSON.stringify({
             email: user.email,
             name: user.name,

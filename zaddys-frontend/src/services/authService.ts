@@ -6,7 +6,7 @@ export async function registerUser(userData: {
   referralCode?: string;
   fullName?: string;
 }) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+  const apiUrl = getApiUrl();
   
   try {
     const res = await fetch(`${apiUrl}/auth/register/`, {
