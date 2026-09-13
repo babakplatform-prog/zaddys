@@ -66,16 +66,6 @@ class CreateOrderView(views.APIView):
                     'order_number': existing_order.order_number,
                 }, status=status.HTTP_200_OK)
 
-            verification = requests.get(
-                f'https://api.paystack.co/transaction/verify/{reference}',
-                headers={'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}'},
-                timeout=10,
-            )
-            verification.raise_for_status()
-            payment = verification.json().get('data', {})
-            if payment.get('status') != 'success':
-                return Response({'error': 'Paystack did not confirm this payment.'}, status=status.HTTP_400_BAD_REQUEST)
-
             products = []
             total = Decimal('0')
             delivery_zone_id = data.get('delivery_zone_id')
@@ -115,6 +105,25 @@ class CreateOrderView(views.APIView):
                 discount = min(discount, total)
                 total -= discount
             expected_amount = int(total * 100)
+            if settings.E2E_TEST_MODE:
+                payment = {
+                    'status': 'success',
+                    'amount': expected_amount,
+                    'customer': {'email': data.get('email', '').lower()},
+                    'id': reference,
+                    'channel': 'mock'
+                }
+            else:
+                verification = requests.get(
+                    f'https://api.paystack.co/transaction/verify/{reference}',
+                    headers={'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}'},
+                    timeout=10,
+                )
+                verification.raise_for_status()
+                payment = verification.json().get('data', {})
+                if payment.get('status') != 'success':
+                    return Response({'error': 'Paystack did not confirm this payment.'}, status=status.HTTP_400_BAD_REQUEST)
+
             if payment.get('amount') != expected_amount or payment.get('customer', {}).get('email', '').lower() != data.get('email', '').lower():
                 return Response({'error': 'Payment amount or customer does not match this order.'}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -26,29 +26,36 @@ interface CartContextType {
   clearCart: () => void;
   cartTotal: number;
   cartCount: number;
+  isHydrated: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const hydrateCart = window.setTimeout(() => {
-    try {
-      const savedCart = localStorage.getItem("zaddys_cart");
-      if (savedCart) setCart(JSON.parse(savedCart));
-    } catch {
-      localStorage.removeItem("zaddys_cart");
-    }
+      try {
+        const savedCart = localStorage.getItem("zaddys_cart");
+        if (savedCart) {
+          setCart(JSON.parse(savedCart));
+        }
+      } catch {
+        localStorage.removeItem("zaddys_cart");
+      } finally {
+        setIsHydrated(true);
+      }
     }, 0);
     return () => window.clearTimeout(hydrateCart);
   }, []);
 
-  // Save cart to LocalStorage whenever it changes
+  // Save cart to LocalStorage only after hydration has completed.
   useEffect(() => {
+    if (!isHydrated) return;
     localStorage.setItem("zaddys_cart", JSON.stringify(cart));
-  }, [cart]);
+  }, [cart, isHydrated]);
 
   const addToCart = (newItem: Omit<CartItem, 'cartItemId'>) => {
     const cartItemId = generateCartItemId(newItem.id, newItem.selected_option_ids);
@@ -81,7 +88,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount, isHydrated }}>
       {children}
     </CartContext.Provider>
   );

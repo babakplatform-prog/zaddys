@@ -15,9 +15,13 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     {
-      command: "python manage.py runserver 127.0.0.1:8000 --noreload",
+      command: "python manage.py migrate --noinput && python manage.py runserver 127.0.0.1:8000 --noreload",
       cwd: "../zaddys-backend",
-      env: { ...process.env, E2E_TEST_MODE: "1" },
+      env: {
+        ...process.env,
+        E2E_TEST_MODE: "1",
+        SOCIAL_LOGIN_SECRET: process.env.SOCIAL_LOGIN_SECRET || "e2e-social-secret",
+      },
       url: "http://127.0.0.1:8000/",
       reuseExistingServer: false,
       timeout: 120000,
@@ -25,7 +29,12 @@ export default defineConfig({
     {
       command: "npm run dev",
       cwd: ".",
-      env: { ...process.env, NEXT_PUBLIC_API_URL: "http://127.0.0.1:8000/api" },
+      env: {
+        ...process.env,
+        NEXT_PUBLIC_API_URL: "http://127.0.0.1:8000/api",
+        NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_mock_e2e_key",
+        SOCIAL_LOGIN_SECRET: process.env.SOCIAL_LOGIN_SECRET || "e2e-social-secret",
+      },
       url: "http://127.0.0.1:3000",
       reuseExistingServer: false,
       timeout: 120000,
