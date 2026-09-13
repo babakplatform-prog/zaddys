@@ -2,8 +2,8 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
 
-const requiredEnv = (name: string) => {
-  const value = process.env[name];
+const requiredEnv = (name: string, fallback?: string) => {
+  const value = process.env[name] || fallback;
   if (!value) throw new Error(`Missing required authentication environment variable: ${name}`);
   return value;
 };
@@ -27,12 +27,12 @@ const handler = (NextAuth as any)({
     async jwt({ token, user, account }: any) {
       if (account && user) {
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://zaddys-api.onrender.com/api";
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
           const payload = JSON.stringify({
             email: user.email,
             name: user.name,
             provider: account.provider,
-            secret: requiredEnv("SOCIAL_LOGIN_SECRET"),
+            secret: requiredEnv("SOCIAL_LOGIN_SECRET", process.env.NEXTAUTH_SECRET),
           });
           let res: Response | undefined;
           for (let attempt = 0; attempt < 3; attempt += 1) {
